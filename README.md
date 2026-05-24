@@ -1,0 +1,1 @@
+Test KMP project for Android + Desktop with SingBox. 
