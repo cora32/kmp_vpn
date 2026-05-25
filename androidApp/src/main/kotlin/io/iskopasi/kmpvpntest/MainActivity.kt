@@ -1,28 +1,90 @@
 package io.iskopasi.kmpvpntest
 
+import android.Manifest.permission.POST_NOTIFICATIONS
+import android.app.Activity
+import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.defaultComponentContext
-import io.iskopasi.kmpvpntest.decompose.MainComponentImpl
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import org.koin.core.context.GlobalContext
 
 class MainActivity : ComponentActivity() {
+    private val permissionApi: PermissionsApi = getPermissionApi()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         val model = RootComponent(
             componentContext = defaultComponentContext(),
-            koin = GlobalContext.get()
+            koin = GlobalContext.get(),
+            permissionApi = permissionApi
         )
 
         setContent {
-            App(model= model.main)
+            val vpnPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    model.main.onVPNPermissionGranted()
+                } else {
+                    model.main.onVPNPermissionDenied()
+                }
+            }
+            val postPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    model.main.onPostPermissionGranted()
+                } else {
+                    model.main.onPostPermissionDenied()
+                }
+            }
+
+            var requestVPNPermission by permissionApi.requestVPNPermission
+            LaunchedEffect(requestVPNPermission) {
+                if (requestVPNPermission) {
+                    val intent = VpnService.prepare(application)
+
+                    if (intent != null) {
+                        vpnPermissionLauncher.launch(intent)
+                    } else {
+                        model.main.onPostPermissionGranted()
+                    }
+                    requestVPNPermission = false
+                }
+            }
+
+            var requestPostPermission by permissionApi.requestPostPermission
+            LaunchedEffect(requestPostPermission) {
+                if (requestPostPermission) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        postPermissionLauncher.launch(POST_NOTIFICATIONS)
+                        requestPostPermission = false
+                    }
+                }
+            }
+
+            App(model = model.main)
+
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                RuntimePermissionsDialog(
+//                    POST_NOTIFICATIONS,
+//                    onPermissionGranted = {
+//                    },
+//                    onPermissionDenied = {
+//                    },
+//                )
+//            }
         }
     }
 }

@@ -11,7 +11,11 @@ class App : Application() {
 
         startKoin {
             androidContext(this@App)
-            modules(getModel(getVpnPlatformApi()))
+            modules(
+                getModel(
+                    vpnPlatformApi = getVpnPlatformApi()
+                )
+            )
         }
     }
 }

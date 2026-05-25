@@ -11,14 +11,19 @@ import org.koin.core.context.startKoin
 
 fun main() = application {
     startKoin {
-        modules(getModel(getVpnPlatformApi()))
+        modules(
+            getModel(
+                vpnPlatformApi = getVpnPlatformApi(),
+            )
+        )
     }
 
     val model = RootComponent(
         componentContext = DefaultComponentContext(
             LifecycleRegistry()
         ),
-        koin = GlobalContext.get()
+        koin = GlobalContext.get(),
+        permissionApi = getPermissionApi()
     )
 
     Window(
