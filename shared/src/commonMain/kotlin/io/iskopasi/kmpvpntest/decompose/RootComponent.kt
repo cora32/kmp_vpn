@@ -12,7 +12,7 @@ class RootComponent(
 ): ComponentContext by componentContext {
     val main = MainComponentImpl(
         componentContext = childContext("main"),
-        vpnRepo = koin.get(),
+        proxyManager = koin.get(),
         permissionApi = permissionApi
     )
 }

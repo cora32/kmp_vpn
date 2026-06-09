@@ -18,8 +18,11 @@ import io.iskopasi.kmpvpntest.SessionName
 import io.iskopasi.kmpvpntest.StartCommand
 import io.iskopasi.kmpvpntest.StopCommand
 import io.iskopasi.kmpvpntest.UsernameExtra
+import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.e
-import io.iskopasi.kmpvpntest.managers.SPManager
+import io.iskopasi.kmpvpntest.managers.ConfigBuilder
+import io.iskopasi.kmpvpntest.managers.NManager
+import io.iskopasi.kmpvpntest.managers.SignalManager
 import io.nekohasekai.libbox.CommandServer
 import io.nekohasekai.libbox.CommandServerHandler
 import io.nekohasekai.libbox.ConnectionOwner
@@ -40,17 +43,27 @@ import io.nekohasekai.libbox.WIFIState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancel
 import org.koin.android.ext.android.inject
 import java.io.File
 
 class VPNServiceImpl : VpnService(),
     CommandServerHandler,
     PlatformInterface {
-    private val spManager: SPManager by inject()
+    private val prefStoreApi: PrefStoreApi by inject()
+    private val signalManager: SignalManager by inject()
+    private val nManager: NManager by inject()
     private var vpnInterface: ParcelFileDescriptor? = null
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var commandServer: CommandServer? = null
+
+    override fun onCreate() {
+        super.onCreate()
+
+        nManager.createChannel()
+
+        nManager.startForeground(service = this)
+    }
 
     override fun onStartCommand(
         intent: Intent?,
@@ -77,7 +90,7 @@ class VPNServiceImpl : VpnService(),
                     )
                 }
 
-                StopCommand -> onStopVPNAsync()
+                StopCommand -> stopVpn()
             }
         }
 
@@ -107,8 +120,8 @@ class VPNServiceImpl : VpnService(),
                     username = username,
                     password = password,
                     logLevel = logLevel ?: "debug",
-                    routeAllAppsIntoVPN = spManager.allowAllApps,
-                    allowedPackages = spManager.allowedApps
+                    routeAllAppsIntoVPN = prefStoreApi.allowAllApps,
+                    allowedPackages = prefStoreApi.allowedApps
                 ).e
 
                 // Configure control server
@@ -123,6 +136,7 @@ class VPNServiceImpl : VpnService(),
             } catch (ex: Exception) {
                 "doJob ex: $ex".e
                 ex.printStackTrace()
+                stopVpn()
             }
         }
     }
@@ -145,19 +159,13 @@ class VPNServiceImpl : VpnService(),
         Libbox.setup(options)
     }
 
-    private fun onStopVPNAsync() {
-        serviceScope.launch {
-            stopVpn()
-        }
-    }
-
     override fun onRevoke() {
-        onStopVPNAsync()
+        stopVpn()
 
         super.onRevoke()
     }
 
-    private suspend fun stopVpn() {
+    private fun stopVpn() {
         try {
             // Stop engine
             commandServer?.closeService()
@@ -171,9 +179,20 @@ class VPNServiceImpl : VpnService(),
             vpnInterface = null
 
             stopForeground(STOP_FOREGROUND_REMOVE)
+            nManager.cancel()
+
+            signalManager.onDisconnected()
 
             stopSelf()
         }
+    }
+
+    override fun onDestroy() {
+        serviceScope.cancel()
+        nManager.cancel()
+        signalManager.onDisconnected()
+
+        super.onDestroy()
     }
 
     // PlatformHandler
@@ -224,8 +243,8 @@ class VPNServiceImpl : VpnService(),
         builder.setMtu(1500)
         builder.addRoute(DefaultRoute, 0)
 
-        val allowedApps = spManager.allowedApps
-        val routeAllApps = spManager.allowAllApps
+        val allowedApps = prefStoreApi.allowedApps
+        val routeAllApps = prefStoreApi.allowAllApps
         if (routeAllApps) {
             builder.addDisallowedApplication(packageName)
         } else if (allowedApps.isNotEmpty()) {
@@ -270,9 +289,15 @@ class VPNServiceImpl : VpnService(),
 
             vpnInterface = builder.establish()
 
-            "VPN started...".e
+            "[Service] VPN started...".e
+            val fd = vpnInterface?.fd ?: -1
 
-            return vpnInterface?.fd ?: -1
+            if (fd != -1)
+                signalManager.onConnected()
+            else
+                signalManager.onDisconnected()
+
+            return fd
         } catch (ex: Exception) {
             "openTun ex: $ex".e
             ex.printStackTrace()
@@ -330,7 +355,7 @@ class VPNServiceImpl : VpnService(),
     }
 
     override fun serviceStop() {
-        onStopVPNAsync()
+        stopVpn()
     }
 
     override fun setSystemProxyEnabled(enabled: Boolean) {

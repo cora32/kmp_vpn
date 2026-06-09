@@ -1,13 +1,13 @@
 package io.iskopasi.kmpvpntest.api
 
-class JVMVpnPlatformApi: VpnPlatformApi {
-    override fun startVPN() {
-        TODO("Not yet implemented")
-    }
-
-    override fun stopVPN() {
-        TODO("Not yet implemented")
-    }
-}
-
-actual fun getVpnPlatformApi(): VpnPlatformApi = JVMVpnPlatformApi()
+//class JVMVpnServiceApi: VpnServiceApi {
+//    override fun startVPN() {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun stopVPN() {
+//        TODO("Not yet implemented")
+//    }
+//}
+//
+//actual fun getVpnServiceApi(): VpnServiceApi = JVMVpnServiceApi()

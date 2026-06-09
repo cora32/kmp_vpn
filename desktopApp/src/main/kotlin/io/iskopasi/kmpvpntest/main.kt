@@ -6,7 +6,7 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import io.iskopasi.kmpvpntest.api.getPermissionApi
 import io.iskopasi.kmpvpntest.api.getPrefStore
-import io.iskopasi.kmpvpntest.api.getVpnPlatformApi
+import io.iskopasi.kmpvpntest.api.getVpnServiceApi
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.di.getModel
 import org.koin.core.context.GlobalContext
@@ -16,7 +16,7 @@ fun main() = application {
     startKoin {
         modules(
             getModel(
-                vpnPlatformApi = getVpnPlatformApi(),
+                vpnServiceApi = getVpnServiceApi(),
                 prefStoreApi = getPrefStore()
             )
         )

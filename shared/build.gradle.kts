@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 kotlin {
@@ -32,6 +34,9 @@ kotlin {
 
             // Koin
             api("io.insert-koin:koin-android:3.2.0")
+
+            // Json
+            api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
             // Singbox
             api(files("libs/singbox.aar"))

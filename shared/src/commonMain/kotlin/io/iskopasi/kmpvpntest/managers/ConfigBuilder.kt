@@ -1,4 +1,4 @@
-package io.iskopasi.kmpvpntest.services
+package io.iskopasi.kmpvpntest.managers
 
 private const val hostPlaceholder = "%HOST%"
 private const val portPlaceholder = "%PORT%"

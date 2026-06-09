@@ -3,16 +3,34 @@ package io.iskopasi.kmpvpntest.api
 import android.app.Application
 import android.content.Context
 import androidx.core.content.edit
+import io.iskopasi.kmpvpntest.managers.ProxyData
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class AndroidPrefStoreApi : PrefStoreApi, KoinComponent {
-    // We use Koin to inject the Application context
     private val application: Application by inject()
 
     private val sp by lazy {
         application.getSharedPreferences("kmp_vpn", Context.MODE_PRIVATE)
     }
+
+    override var proxyData: ProxyData
+        get() {
+            sp.getString("proxy_data", "")?.let {
+                if (it.isEmpty()) return ProxyData.empty
+
+                return Json.decodeFromString<ProxyData>(it)
+            }
+
+            return ProxyData.empty
+        }
+        set(value) {
+            sp.edit(commit = true) {
+                putString("proxy_data", Json.encodeToString(value))
+            }
+        }
 
     override var allowedApps: Set<String>
         get() = sp.getStringSet("allowed_apps", emptySet()) ?: emptySet()
