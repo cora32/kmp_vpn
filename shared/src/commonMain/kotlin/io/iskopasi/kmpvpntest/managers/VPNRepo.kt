@@ -1,21 +1,15 @@
 package io.iskopasi.kmpvpntest.managers
 
-import io.iskopasi.kmpvpntest.VpnPlatformApi
+import io.iskopasi.kmpvpntest.api.VpnPlatformApi
 
-interface VPNRepo {
-    fun connect()
-
-    fun disconnect()
-}
-
-class VPNRepoImpl(
+class VPNService(
     val vpnPlatformApi: VpnPlatformApi
-) : VPNRepo {
-    override fun connect() {
+) {
+    fun connect() {
         vpnPlatformApi.startVPN()
     }
 
-    override fun disconnect() {
+    fun disconnect() {
         vpnPlatformApi.stopVPN()
     }
 }

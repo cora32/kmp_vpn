@@ -1,4 +1,4 @@
-package io.iskopasi.kmpvpntest
+package io.iskopasi.kmpvpntest.api
 
 class AndroidVpnPlatformApi : VpnPlatformApi {
     override fun startVPN() {

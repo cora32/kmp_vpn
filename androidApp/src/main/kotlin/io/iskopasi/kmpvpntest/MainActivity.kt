@@ -14,6 +14,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.defaultComponentContext
+import io.iskopasi.kmpvpntest.api.PermissionsApi
+import io.iskopasi.kmpvpntest.api.getPermissionApi
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import org.koin.core.context.GlobalContext
 

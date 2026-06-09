@@ -1,4 +1,4 @@
-package io.iskopasi.kmpvpntest
+package io.iskopasi.kmpvpntest.api
 
 actual fun logError(msg: String) {
     System.err.println("--> $msg")

@@ -1,16 +1,20 @@
 package io.iskopasi.kmpvpntest.di
 
-import io.iskopasi.kmpvpntest.VpnPlatformApi
-import io.iskopasi.kmpvpntest.managers.VPNRepo
-import io.iskopasi.kmpvpntest.managers.VPNRepoImpl
+import io.iskopasi.kmpvpntest.api.PrefStoreApi
+import io.iskopasi.kmpvpntest.api.VpnPlatformApi
+import io.iskopasi.kmpvpntest.managers.VPNService
 import org.koin.dsl.module
 
 fun getModel(
-    vpnPlatformApi: VpnPlatformApi
+    vpnPlatformApi: VpnPlatformApi,
+    prefStoreApi: PrefStoreApi
 ) = module {
-    single<VPNRepo> {
-        VPNRepoImpl(
+    single<VPNService> {
+        VPNService(
             vpnPlatformApi = vpnPlatformApi,
         )
+    }
+    single<PrefStoreApi> {
+        prefStoreApi
     }
 }

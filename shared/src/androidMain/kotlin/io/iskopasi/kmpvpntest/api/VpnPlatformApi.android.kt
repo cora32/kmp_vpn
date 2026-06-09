@@ -1,4 +1,4 @@
-package io.iskopasi.kmpvpntest
+package io.iskopasi.kmpvpntest.api
 
 import android.util.Log
 

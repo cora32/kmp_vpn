@@ -1,42 +1,194 @@
 package io.iskopasi.kmpvpntest.services
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.net.VpnService
+import android.net.wifi.WifiManager
+import android.os.Build
+import android.os.ParcelFileDescriptor
+import io.iskopasi.kmpvpntest.ClientIP
+import io.iskopasi.kmpvpntest.DNSServer
+import io.iskopasi.kmpvpntest.DefaultRoute
+import io.iskopasi.kmpvpntest.HostExtra
+import io.iskopasi.kmpvpntest.LogLevelExtra
+import io.iskopasi.kmpvpntest.MainActivity
+import io.iskopasi.kmpvpntest.PasswordExtra
+import io.iskopasi.kmpvpntest.PortExtra
+import io.iskopasi.kmpvpntest.SessionName
+import io.iskopasi.kmpvpntest.StartCommand
+import io.iskopasi.kmpvpntest.StopCommand
+import io.iskopasi.kmpvpntest.UsernameExtra
+import io.iskopasi.kmpvpntest.e
+import io.iskopasi.kmpvpntest.managers.SPManager
+import io.nekohasekai.libbox.CommandServer
 import io.nekohasekai.libbox.CommandServerHandler
 import io.nekohasekai.libbox.ConnectionOwner
 import io.nekohasekai.libbox.InterfaceUpdateListener
+import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.LocalDNSTransport
 import io.nekohasekai.libbox.NeighborUpdateListener
+import io.nekohasekai.libbox.NetworkInterface
 import io.nekohasekai.libbox.NetworkInterfaceIterator
 import io.nekohasekai.libbox.Notification
+import io.nekohasekai.libbox.OverrideOptions
 import io.nekohasekai.libbox.PlatformInterface
+import io.nekohasekai.libbox.SetupOptions
 import io.nekohasekai.libbox.StringIterator
 import io.nekohasekai.libbox.SystemProxyStatus
 import io.nekohasekai.libbox.TunOptions
 import io.nekohasekai.libbox.WIFIState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import java.io.File
 
-const val INTENT_PROXY_ID = "proxyId"
-const val INTENT_OLD_PROXY_ID = "oldProxyId"
-const val INTENT_HOST = "INTENT_HOST"
-const val INTENT_PORT = "INTENT_PORT"
-const val INTENT_USERNAME = "INTENT_USERNAME"
-const val INTENT_PASSWORD = "INTENT_PASSWORD"
-const val INTENT_LOG_LEVEL = "INTENT_LOG_LEVEL"
+class VPNServiceImpl : VpnService(),
+    CommandServerHandler,
+    PlatformInterface {
+    private val spManager: SPManager by inject()
+    private var vpnInterface: ParcelFileDescriptor? = null
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var commandServer: CommandServer? = null
 
-class VPNServiceImpl : VpnService(), PlatformInterface, CommandServerHandler {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
+        intent?.let { intent ->
+            val action = intent.action
+
+            when (action) {
+                StartCommand -> {
+                    val host = intent.getStringExtra(HostExtra)
+                    val port = intent.getStringExtra(PortExtra)
+                    val username = intent.getStringExtra(UsernameExtra)
+                    val password = intent.getStringExtra(PasswordExtra)
+                    val logLevel = intent.getStringExtra(LogLevelExtra)
+
+                    onStartVpn(
+                        host = host,
+                        port = port,
+                        username = username,
+                        password = password,
+                        logLevel = logLevel
+                    )
+                }
+
+                StopCommand -> onStopVPNAsync()
+            }
+        }
+
+        return START_STICKY
+    }
+
+    private fun onStartVpn(
+        host: String?,
+        port: String?,
+        username: String?,
+        password: String?,
+        logLevel: String?
+    ) {
+        if (host == null || port == null || username == null || password == null) return
+
+        try {
+            vpnInterface?.close()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+
+        serviceScope.apply {
+            try {
+                val configData = ConfigBuilder.getSocks5Config(
+                    host = host,
+                    port = port,
+                    username = username,
+                    password = password,
+                    logLevel = logLevel ?: "debug",
+                    routeAllAppsIntoVPN = spManager.allowAllApps,
+                    allowedPackages = spManager.allowedApps
+                ).e
+
+                // Configure control server
+                setupSingbox()
+
+                // Start singbox control server
+                startCS()
+
+                "Sending start VPN command...".e
+                val overrideOptions = OverrideOptions()
+                commandServer?.startOrReloadService(configData, overrideOptions)
+            } catch (ex: Exception) {
+                "doJob ex: $ex".e
+                ex.printStackTrace()
+            }
+        }
+    }
+
+    private fun startCS() {
+        commandServer = Libbox.newCommandServer(this, this)
+        commandServer?.start()
+    }
+
+    private fun setupSingbox() {
+        val workingDir = File(filesDir, "libbox")
+        workingDir.mkdirs()
+
+        val options = SetupOptions().apply {
+            workingPath = workingDir.absolutePath
+            basePath = workingDir.absolutePath
+            tempPath = workingDir.absolutePath
+        }
+
+        Libbox.setup(options)
+    }
+
+    private fun onStopVPNAsync() {
+        serviceScope.launch {
+            stopVpn()
+        }
+    }
+
+    override fun onRevoke() {
+        onStopVPNAsync()
+
+        super.onRevoke()
+    }
+
+    private suspend fun stopVpn() {
+        try {
+            // Stop engine
+            commandServer?.closeService()
+            commandServer?.close()
+            commandServer = null
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        } finally {
+            // Close android TUN
+            vpnInterface?.close()
+            vpnInterface = null
+
+            stopForeground(STOP_FOREGROUND_REMOVE)
+
+            stopSelf()
+        }
+    }
+
+    // PlatformHandler
+
     override fun autoDetectInterfaceControl(fd: Int) {
-        TODO("Not yet implemented")
+        protect(fd)
     }
 
     override fun clearDNSCache() {
-        TODO("Not yet implemented")
     }
 
     override fun closeDefaultInterfaceMonitor(listener: InterfaceUpdateListener?) {
-        TODO("Not yet implemented")
     }
 
     override fun closeNeighborMonitor(listener: NeighborUpdateListener?) {
-        TODO("Not yet implemented")
     }
 
     override fun findConnectionOwner(
@@ -46,79 +198,145 @@ class VPNServiceImpl : VpnService(), PlatformInterface, CommandServerHandler {
         destinationAddress: String?,
         destinationPort: Int
     ): ConnectionOwner? {
-        TODO("Not yet implemented")
+        return ConnectionOwner()
     }
 
     override fun getInterfaces(): NetworkInterfaceIterator? {
-        TODO("Not yet implemented")
+        return object : NetworkInterfaceIterator {
+            override fun hasNext(): Boolean = false
+            override fun next(): NetworkInterface? = null
+        }
     }
 
     override fun includeAllNetworks(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun localDNSTransport(): LocalDNSTransport? {
-        TODO("Not yet implemented")
+        return null
+    }
+
+    private fun getBuilderBuilder(): Builder {
+        val builder = Builder()
+        builder.addAddress(ClientIP, 24)
+        builder.addDnsServer(DNSServer)
+        builder.setSession(SessionName)
+        builder.setMtu(1500)
+        builder.addRoute(DefaultRoute, 0)
+
+        val allowedApps = spManager.allowedApps
+        val routeAllApps = spManager.allowAllApps
+        if (routeAllApps) {
+            builder.addDisallowedApplication(packageName)
+        } else if (allowedApps.isNotEmpty()) {
+            allowedApps.forEach { packageName ->
+                try {
+                    builder.addAllowedApplication(packageName)
+                } catch (e: Exception) {
+                    // App might have been uninstalled
+                }
+            }
+        } else {
+            builder.addDisallowedApplication(packageName)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            builder.setMetered(false)
+        }
+
+        val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        val configureIntent = Intent(this, MainActivity::class.java)
+        builder.setConfigureIntent(
+            PendingIntent.getActivity(
+                this,
+                0,
+                configureIntent,
+                pendingIntentFlags
+            )
+        )
+
+        return builder
     }
 
     override fun openTun(options: TunOptions?): Int {
-        TODO("Not yet implemented")
+        if (options == null) return -1
+
+        try {
+            val builder = getBuilderBuilder()
+
+            vpnInterface = builder.establish()
+
+            "VPN started...".e
+
+            return vpnInterface?.fd ?: -1
+        } catch (ex: Exception) {
+            "openTun ex: $ex".e
+            ex.printStackTrace()
+        }
+
+        return -1
     }
 
     override fun readWIFIState(): WIFIState? {
-        TODO("Not yet implemented")
+        val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as? WifiManager
+        val info = wifiManager?.connectionInfo
+
+        if (info != null) {
+            return Libbox.newWIFIState(info.ssid ?: "", info.bssid ?: "")
+        }
+
+        return null
     }
 
     override fun registerMyInterface(name: String?) {
-        TODO("Not yet implemented")
     }
 
     override fun sendNotification(notification: Notification?) {
-        TODO("Not yet implemented")
     }
 
     override fun startDefaultInterfaceMonitor(listener: InterfaceUpdateListener?) {
-        TODO("Not yet implemented")
     }
 
     override fun startNeighborMonitor(listener: NeighborUpdateListener?) {
-        TODO("Not yet implemented")
     }
 
     override fun systemCertificates(): StringIterator? {
-        TODO("Not yet implemented")
+        return null
     }
 
     override fun underNetworkExtension(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override fun usePlatformAutoDetectInterfaceControl(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun useProcFS(): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
+    // Command Server
+
     override fun getSystemProxyStatus(): SystemProxyStatus? {
-        TODO("Not yet implemented")
+        return null
     }
 
     override fun serviceReload() {
-        TODO("Not yet implemented")
     }
 
     override fun serviceStop() {
-        TODO("Not yet implemented")
+        onStopVPNAsync()
     }
 
     override fun setSystemProxyEnabled(enabled: Boolean) {
-        TODO("Not yet implemented")
     }
 
     override fun writeDebugMessage(message: String?) {
-        TODO("Not yet implemented")
-    }
 
+    }
 }

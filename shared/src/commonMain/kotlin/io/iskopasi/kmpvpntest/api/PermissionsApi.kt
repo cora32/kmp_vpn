@@ -1,6 +1,7 @@
-package io.iskopasi.kmpvpntest
+package io.iskopasi.kmpvpntest.api
 
 import androidx.compose.runtime.MutableState
+import io.iskopasi.kmpvpntest.e
 import kotlinx.coroutines.flow.StateFlow
 
 interface PermissionsApi {

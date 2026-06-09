@@ -1,4 +1,4 @@
-package io.iskopasi.kmpvpntest
+package io.iskopasi.kmpvpntest.api
 
 interface VpnPlatformApi {
     fun startVPN()

@@ -1,4 +1,4 @@
-package io.iskopasi.kmpvpntest
+package io.iskopasi.kmpvpntest.api
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
