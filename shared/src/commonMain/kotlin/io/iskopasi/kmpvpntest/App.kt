@@ -88,14 +88,37 @@ fun App(model: MainComponent) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            ErrorBlock(model = model)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             ProxyBlock(model = model)
         }
     }
 }
 
 @Composable
+fun ErrorBlock(
+    modifier: Modifier = Modifier,
+    model: MainComponent
+) {
+    val error by model.errorMessage.collectAsStateWithLifecycle()
+
+    Text(
+        error,
+        style = TextStyle(
+            color = Color.Red,
+        ),
+        modifier = Modifier.padding(32.dp)
+    )
+}
+
+@Composable
 @Preview(backgroundColor = 0xFFffffff)
 fun ProxyBlock(modifier: Modifier = Modifier, model: MainComponent) {
+    val isHostError by model.isHostError.collectAsStateWithLifecycle()
+    val isPortError by model.isPortError.collectAsStateWithLifecycle()
+
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
@@ -105,16 +128,20 @@ fun ProxyBlock(modifier: Modifier = Modifier, model: MainComponent) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Input(
-                label = "socks5://host",
+                label = "IP (socks5 server)",
                 flow = model.host,
+                isError = isHostError,
                 onValueChange = model::onHostChanged,
-                modifier = Modifier.weight(1f).padding(end = 8.dp)
+                modifier = Modifier.weight(1f).padding(end = 8.dp),
+                keyboardType = KeyboardType.Number
             )
             Input(
                 label = "Port",
                 flow = model.port,
+                isError = isPortError,
                 onValueChange = model::onPortChanged,
-                modifier = Modifier.width(80.dp)
+                modifier = Modifier.width(80.dp),
+                keyboardType = KeyboardType.Number
             )
         }
         Spacer(modifier = Modifier.height(32.dp))
@@ -143,6 +170,7 @@ fun Input(
     modifier: Modifier = Modifier,
     label: String,
     flow: StateFlow<String>,
+    isError: Boolean = false,
     onValueChange: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
     keyboardType: KeyboardType = KeyboardType.Text
@@ -164,6 +192,7 @@ fun Input(
             placeholder = { Text(text = "") },
             onValueChange = onValueChange,
             singleLine = true,
+            isError = isError,
             keyboardOptions = KeyboardOptions(
                 imeAction = imeAction,
                 keyboardType = keyboardType

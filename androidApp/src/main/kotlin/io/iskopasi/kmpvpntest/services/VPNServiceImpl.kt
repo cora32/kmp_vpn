@@ -119,7 +119,7 @@ class VPNServiceImpl : VpnService(),
                     port = port,
                     username = username,
                     password = password,
-                    logLevel = logLevel ?: "debug",
+                    logLevel = "debug",
                     routeAllAppsIntoVPN = prefStoreApi.allowAllApps,
                     allowedPackages = prefStoreApi.allowedApps
                 ).e
@@ -154,6 +154,7 @@ class VPNServiceImpl : VpnService(),
             workingPath = workingDir.absolutePath
             basePath = workingDir.absolutePath
             tempPath = workingDir.absolutePath
+            debug = true
         }
 
         Libbox.setup(options)
@@ -362,6 +363,6 @@ class VPNServiceImpl : VpnService(),
     }
 
     override fun writeDebugMessage(message: String?) {
-
+        if (message == null) return
     }
 }

@@ -22,15 +22,15 @@ val allowAllApps = """
                         ]
                       },
                       "inbounds": [
-    {
-      "type": "tun",
-      "stack": "gvisor",
-      "address": ["172.19.0.1/24"],
-      "mtu": 1500,
-      "auto_route": true,
-      "strict_route": true,
-              "sniff": true
-    }
+                        {
+                          "type": "tun",
+                          "stack": "gvisor",
+                          "address": ["172.19.0.1/24"],
+                          "mtu": 1500,
+                          "auto_route": true,
+                          "strict_route": true,
+                                  "sniff": true
+                        }
                       ],
                       "outbounds": [
                         {
@@ -39,15 +39,15 @@ val allowAllApps = """
                           "domain_strategy": "prefer_ipv4",
                           "bind_interface": "en0"
                         },
-    {
-      "type": "socks",
-      "tag": "proxy",
-      "server": "$hostPlaceholder",
-      "server_port": $portPlaceholder,
-      "version": "5",
-    "username": "$usernamePlaceholder",
-    "password": "$passwordPlaceholder"
-    }
+                        {
+                          "type": "socks",
+                          "tag": "proxy",
+                          "server": "$hostPlaceholder",
+                          "server_port": $portPlaceholder,
+                          "version": "5",
+                        "username": "$usernamePlaceholder",
+                        "password": "$passwordPlaceholder"
+                        }
                       ],
                       "route": {
                         "rules": [
@@ -76,15 +76,15 @@ val allowSelectedApps = """
                         ]
                       },
                       "inbounds": [
-    {
-      "type": "tun",
-      "stack": "gvisor",
-      "address": ["172.19.0.1/24"],
-      "mtu": 1500,
-      "auto_route": true,
-      "strict_route": true,
-              "sniff": true
-    }
+                        {
+                          "type": "tun",
+                          "stack": "gvisor",
+                          "address": ["172.19.0.1/24"],
+                          "mtu": 1500,
+                          "auto_route": true,
+                          "strict_route": true,
+                                  "sniff": true
+                        }
                       ],
                       "outbounds": [
                         {
@@ -93,22 +93,22 @@ val allowSelectedApps = """
                           "domain_strategy": "prefer_ipv4",
                           "bind_interface": "en0"
                         },
-    {
-      "type": "socks",
-      "tag": "proxy",
-      "server": "$hostPlaceholder",
-      "server_port": $portPlaceholder,
-      "version": "5",
-    "username": "$usernamePlaceholder",
-    "password": "$passwordPlaceholder"
-    }
+                        {
+                          "type": "socks",
+                          "tag": "proxy",
+                          "server": "$hostPlaceholder",
+                          "server_port": $portPlaceholder,
+                          "version": "5",
+                        "username": "$usernamePlaceholder",
+                        "password": "$passwordPlaceholder"
+                        }
                       ],
                       "route": {
                         "rules": [
-              {
-                "package_name": [$allowedPackagesPlaceholder],
-                "outbound": "proxy-out"
-              },
+                          {
+                            "package_name": [$allowedPackagesPlaceholder],
+                            "outbound": "proxy-out"
+                          },
                           {
                             "port": 53,
                             "action": "hijack-dns"

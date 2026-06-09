@@ -20,6 +20,10 @@ interface MainComponent {
     val port: StateFlow<String>
     val username: StateFlow<String>
     val password: StateFlow<String>
+    val errorMessage: StateFlow<String>
+
+    val isHostError: StateFlow<Boolean>
+    val isPortError: StateFlow<Boolean>
 
     fun onConnect()
     fun onHostChanged(value: String)
@@ -44,6 +48,9 @@ class MainComponentImpl(
     private val _port = MutableStateFlow(proxyManager.proxyData.port)
     private val _username = MutableStateFlow(proxyManager.proxyData.username)
     private val _password = MutableStateFlow(proxyManager.proxyData.password)
+    private val _isHostError = MutableStateFlow(false)
+    private val _isPortError = MutableStateFlow(false)
+    private val _errorMessage = MutableStateFlow("")
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -52,8 +59,47 @@ class MainComponentImpl(
     override val port = _port.asStateFlow()
     override val username = _username.asStateFlow()
     override val password = _password.asStateFlow()
+    override val errorMessage = _errorMessage.asStateFlow()
+    override val isHostError = _isHostError.asStateFlow()
+    override val isPortError = _isPortError.asStateFlow()
+
+    init {
+        val errorJob = scope.launch {
+            proxyManager.signalManager.errorBus.collect { errorMsg ->
+                // Update UI state with error
+                _errorMessage.update { errorMsg }
+                setState(MainComponent.State.Idle)
+            }
+        }
+    }
+
+    private fun validateHost(host: String): Boolean {
+        val isValid = host.isNotBlank()
+
+        _isHostError.update {
+            !isValid
+        }
+
+        return isValid
+    }
+
+    private fun validatePort(port: String): Boolean {
+        val portInt = port.toIntOrNull()
+        val isValid = portInt != null && portInt in 1..65535
+
+        _isPortError.update {
+            !isValid
+        }
+
+        return isValid
+    }
 
     override fun onConnect() {
+        val isHostValid = validateHost(_host.value)
+        val isPortValid = validatePort(_port.value)
+
+        if (!isHostValid || !isPortValid) return
+
         permissionApi.requestPermissions()
 
         scope.launch {

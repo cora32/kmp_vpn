@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 class SignalManager {
     val signalBus =
         MutableSharedFlow<Boolean?>(replay = 1)
+    val errorBus = MutableSharedFlow<String>(replay = 0) // New error flow
 
     fun onConnected() {
         "[Signal] onConnected".e
@@ -19,5 +20,9 @@ class SignalManager {
 
     fun reset() {
         signalBus.tryEmit(null)
+    }
+
+    fun onError(message: String) {
+        errorBus.tryEmit(message)
     }
 }
