@@ -121,6 +121,9 @@ fun ErrorBlock(
 fun ProxyBlock(modifier: Modifier = Modifier, model: MainComponent) {
     val isHostError by model.isHostError.collectAsStateWithLifecycle()
     val isPortError by model.isPortError.collectAsStateWithLifecycle()
+    val state by model.state.collectAsStateWithLifecycle()
+
+    val isEnabled = state == MainComponent.State.Idle
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -135,6 +138,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, model: MainComponent) {
                 flow = model.host,
                 isError = isHostError,
                 onValueChange = model::onHostChanged,
+                isEnabled = isEnabled,
                 modifier = Modifier.weight(1f).padding(end = 8.dp),
                 keyboardType = KeyboardType.Number
             )
@@ -143,6 +147,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, model: MainComponent) {
                 flow = model.port,
                 isError = isPortError,
                 onValueChange = model::onPortChanged,
+                isEnabled = isEnabled,
                 modifier = Modifier.width(80.dp),
                 keyboardType = KeyboardType.Number
             )
@@ -153,6 +158,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, model: MainComponent) {
                 label = "Username",
                 flow = model.username,
                 onValueChange = model::onUsernameChanged,
+                isEnabled = isEnabled,
                 modifier = Modifier
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -161,6 +167,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, model: MainComponent) {
                 flow = model.password,
                 onValueChange = model::onPasswordChanged,
                 modifier = Modifier,
+                isEnabled = isEnabled,
                 imeAction = ImeAction.Done,
                 keyboardType = KeyboardType.Password
             )
@@ -175,6 +182,7 @@ fun Input(
     flow: StateFlow<String>,
     isError: Boolean = false,
     onValueChange: (String) -> Unit,
+    isEnabled: Boolean,
     imeAction: ImeAction = ImeAction.Next,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
@@ -190,6 +198,7 @@ fun Input(
         )
         Spacer(modifier = Modifier.height(4.dp))
         OutlinedTextField(
+            enabled = isEnabled,
             value = value,
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(text = "") },
