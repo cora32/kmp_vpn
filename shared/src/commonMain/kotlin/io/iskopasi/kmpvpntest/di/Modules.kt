@@ -10,7 +10,7 @@ import io.iskopasi.kmpvpntest.managers.ProxyManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
 import org.koin.dsl.module
 
-fun getModel() = module {
+fun getModules() = module {
     factory<ProxyManager> {
         ProxyManager(
             vpnApi = get(),

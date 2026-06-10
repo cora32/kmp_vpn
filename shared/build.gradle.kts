@@ -35,9 +35,6 @@ kotlin {
             // Koin
             api("io.insert-koin:koin-android:3.2.0")
 
-            // Json
-            api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-
             // Singbox
             api(files("libs/singbox.aar"))
 
@@ -61,6 +58,9 @@ kotlin {
 
             // Koin
             api("io.insert-koin:koin-core:3.2.0")
+
+            // Json
+            api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
             // Ktor
             implementation("io.ktor:ktor-client-core:3.5.0")

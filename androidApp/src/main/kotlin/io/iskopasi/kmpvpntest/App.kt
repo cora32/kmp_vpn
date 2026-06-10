@@ -1,7 +1,7 @@
 package io.iskopasi.kmpvpntest
 
 import android.app.Application
-import io.iskopasi.kmpvpntest.di.getModel
+import io.iskopasi.kmpvpntest.di.getModules
 import io.iskopasi.kmpvpntest.managers.NManager
 import io.iskopasi.kmpvpntest.managers.VPNLauncher
 import io.iskopasi.kmpvpntest.managers.VPNLauncherInterface
@@ -16,7 +16,7 @@ class App : Application() {
         startKoin {
             androidContext(this@App)
             modules(
-                getModel(),
+                getModules(),
 
                 module {
                     factory<NManager> {

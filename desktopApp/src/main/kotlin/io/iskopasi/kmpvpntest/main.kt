@@ -4,21 +4,23 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import io.iskopasi.kmpvpntest.api.getPermissionApi
-import io.iskopasi.kmpvpntest.api.getPrefStore
-import io.iskopasi.kmpvpntest.api.getVpnServiceApi
 import io.iskopasi.kmpvpntest.decompose.RootComponent
-import io.iskopasi.kmpvpntest.di.getModel
-import org.koin.core.context.GlobalContext
+import io.iskopasi.kmpvpntest.di.getModules
+import io.iskopasi.kmpvpntest.managers.VPNLauncher
+import io.iskopasi.kmpvpntest.managers.VPNLauncherInterface
 import org.koin.core.context.startKoin
+import org.koin.dsl.module
 
 fun main() = application {
     startKoin {
         modules(
-            getModel(
-                vpnServiceApi = getVpnServiceApi(),
-                prefStoreApi = getPrefStore()
-            )
+            getModules(),
+
+            module {
+                single<VPNLauncherInterface> {
+                    VPNLauncher()
+                }
+            }
         )
     }
 
@@ -26,8 +28,6 @@ fun main() = application {
         componentContext = DefaultComponentContext(
             LifecycleRegistry()
         ),
-        koin = GlobalContext.get(),
-        permissionApi = getPermissionApi()
     )
 
     Window(
