@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import io.iskopasi.kmpvpntest.api.PermissionsApi
 import io.iskopasi.kmpvpntest.e
 import io.iskopasi.kmpvpntest.managers.ProxyManager
+import io.iskopasi.kmpvpntest.managers.SignalManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -11,8 +12,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 interface MainComponent {
     val state: StateFlow<State>
@@ -34,15 +38,17 @@ interface MainComponent {
     enum class State {
         Idle,
         Connecting,
-        Connected
+        Connected,
+        Error
     }
 }
 
 class MainComponentImpl(
     private val componentContext: ComponentContext,
-    private val proxyManager: ProxyManager,
-    private val permissionApi: PermissionsApi,
-) : MainComponent, ComponentContext by componentContext {
+) : MainComponent, ComponentContext by componentContext, KoinComponent {
+    private val proxyManager: ProxyManager by inject()
+    private val permissionApi: PermissionsApi by inject()
+    private val signalManager: SignalManager by inject()
     private val _state = MutableStateFlow(MainComponent.State.Idle)
     private val _host = MutableStateFlow(proxyManager.proxyData.host)
     private val _port = MutableStateFlow(proxyManager.proxyData.port)
@@ -65,11 +71,14 @@ class MainComponentImpl(
 
     init {
         val errorJob = scope.launch {
-            proxyManager.signalManager.errorBus.collect { errorMsg ->
-                // Update UI state with error
-                _errorMessage.update { errorMsg }
-                setState(MainComponent.State.Idle)
-            }
+            signalManager.errorBus
+                .filter { it.isNotEmpty() }
+                .collect { errorMsg ->
+                    "errorMsg: $errorMsg".e
+                    // Update UI state with error
+                    _errorMessage.update { errorMsg }
+                    setState(MainComponent.State.Idle)
+                }
         }
     }
 
@@ -131,17 +140,25 @@ class MainComponentImpl(
         setState(MainComponent.State.Connecting)
 
         scope.launch {
-            proxyManager.signalManager.reset()
-            proxyManager.startVPN()
+            signalManager.reset()
 
-            "[MainComponent] waiting for isConnected...".e
-            val isConnected = proxyManager.isConnected()
-            "[MainComponent] isConnected result: $isConnected".e
+            val isOk = proxyManager.checkConnection()
+            "[MainComponent] Proxy check: $isOk".e
 
-            if (isConnected) {
-                setState(MainComponent.State.Connected)
+            if (isOk) {
+                proxyManager.startVPN()
+
+                val isConnected = proxyManager.isConnected()
+                "[MainComponent] isConnected result: $isConnected".e
+
+                if (isConnected) {
+                    setState(MainComponent.State.Connected)
+                } else {
+                    setState(MainComponent.State.Idle)
+                }
             } else {
                 setState(MainComponent.State.Idle)
+                signalManager.onError("Connection error.\nCheck your proxy settings.")
             }
         }
     }

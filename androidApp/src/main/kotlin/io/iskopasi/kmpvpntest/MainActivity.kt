@@ -15,12 +15,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.defaultComponentContext
 import io.iskopasi.kmpvpntest.api.PermissionsApi
-import io.iskopasi.kmpvpntest.api.getPermissionApi
 import io.iskopasi.kmpvpntest.decompose.RootComponent
-import org.koin.core.context.GlobalContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class MainActivity : ComponentActivity() {
-    private val permissionApi: PermissionsApi = getPermissionApi()
+class MainActivity : ComponentActivity(), KoinComponent {
+    private val permissionApi: PermissionsApi by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -28,8 +28,6 @@ class MainActivity : ComponentActivity() {
 
         val model = RootComponent(
             componentContext = defaultComponentContext(),
-            koin = GlobalContext.get(),
-            permissionApi = permissionApi
         )
 
         setContent {

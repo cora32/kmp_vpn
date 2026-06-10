@@ -40,6 +40,9 @@ kotlin {
 
             // Singbox
             api(files("libs/singbox.aar"))
+
+            //OkHttp
+            implementation("io.ktor:ktor-client-okhttp:3.5.0")
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -58,6 +61,12 @@ kotlin {
 
             // Koin
             api("io.insert-koin:koin-core:3.2.0")
+
+            // Ktor
+            implementation("io.ktor:ktor-client-core:3.5.0")
+        }
+        jvmMain.dependencies {
+            implementation("io.ktor:ktor-client-cio:3.5.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
