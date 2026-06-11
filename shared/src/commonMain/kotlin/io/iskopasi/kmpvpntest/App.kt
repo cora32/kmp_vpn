@@ -84,7 +84,7 @@ fun App(model: MainComponent) {
                         MainComponent.State.Connected -> "Connected"
                         else -> "Idle"
                     }
-                    Text(stateText)
+                    Text(stateText, style = TextStyle(fontSize = 14.sp))
                 }
             }
 
