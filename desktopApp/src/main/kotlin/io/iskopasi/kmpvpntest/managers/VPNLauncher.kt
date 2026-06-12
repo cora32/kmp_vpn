@@ -35,6 +35,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
         Thread.sleep(1000)
 
         val proxyData = prefStore.proxyData
+        val interfaceName = "KMPVPN_${System.currentTimeMillis()}"
 
         // 1. Prepare Config
         val config = ConfigBuilder.getSocks5DesktopConfig(
@@ -43,6 +44,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
             username = proxyData.username,
             password = proxyData.password,
             logLevel = "debug",
+            interfaceName = interfaceName,
             routeAllAppsIntoVPN = prefStore.allowAllApps,
             allowedPackages = prefStore.allowedApps
         )
@@ -87,13 +89,24 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
         debugStreamHandler = null
 
         try {
+            // 1. Force kill the sing-box process tree
+            ProcessBuilder("taskkill", "/F", "/IM", "sing-box.exe", "/T").start().waitFor()
+
+            // 2. Clear DNS first (prevents routing lockups)
             ProcessBuilder(
-                "taskkill", "/F", "/IM", "sing-box.exe", "/T"
+                "netsh",
+                "interface",
+                "ip",
+                "set",
+                "dns",
+                "name=\"Wi-Fi\"",
+                "source=dhcp"
             ).start().waitFor()
 
-            ProcessBuilder(
-                "netsh", "interface", "delete", "interface", "name=\"KMPVPN\""
-            ).start().waitFor()
+            // 3. Nuclear Cleanup: Use PowerShell to remove all KMPVPN adapters
+            val psCommand =
+                "Get-NetAdapter -Name 'KMPVPN_*' -ErrorAction SilentlyContinue | Remove-NetAdapter -Confirm:\$false"
+            ProcessBuilder("powershell", "-Command", psCommand).start().waitFor()
         } catch (ex: Exception) {
             println("[VPNLauncher] Cleanup error: ${ex.message}")
         }
