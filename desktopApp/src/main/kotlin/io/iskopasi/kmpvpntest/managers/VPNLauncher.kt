@@ -56,9 +56,8 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
 
         // 3. Launch
         val pb = ProcessBuilder(
-            "cmd", "/c",
-            File(workDir, exeFile.name).absolutePath,
-            "run", "-c", configFile.name
+            "powershell", "-Command",
+            "Start-Process '${exeFile.absolutePath}' -ArgumentList 'run -c ${configFile.name}' -Verb RunAs -WindowStyle Hidden"
         )
         pb.directory(workDir)
         pb.redirectErrorStream(true)
