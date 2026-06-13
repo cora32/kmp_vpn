@@ -23,6 +23,12 @@ compose.desktop {
             targetFormats(TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "io.iskopasi.kmpvpntest"
             packageVersion = "1.0.0"
+
+            windows {
+                // 'requestedExecutionLevel' is unresolved in this version of Compose Multiplatform (1.11.0).
+                // If you need admin privileges, consider using a custom manifest or a third-party plugin.
+                // requestedExecutionLevel = "requireAdministrator"
+            }
         }
     }
 }

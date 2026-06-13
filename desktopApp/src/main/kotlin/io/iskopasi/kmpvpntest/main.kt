@@ -35,6 +35,7 @@ import io.iskopasi.kmpvpntest.theme.MaterialIconsMinimize
 import io.iskopasi.kmpvpntest.theme.VscodeCodiconsClose
 import io.iskopasi.kmpvpntest.theme.dark
 import io.iskopasi.kmpvpntest.theme.light
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import java.io.File
@@ -90,10 +91,10 @@ fun main() = application {
         return@application
     }
 
-//    if (!isWindowsAdmin()) {
-//        elevateProcess()
-//        return@application // Exit the non-admin process
-//    }
+    if (!isWindowsAdmin()) {
+        elevateProcess() // We need this to clean our interfaces on cleanup
+        return@application // Exit the non-admin process
+    }
 
     startKoin {
         modules(
@@ -117,7 +118,16 @@ fun main() = application {
         colorScheme = if (isSystemInDarkTheme()) dark else light
     ) {
         Window(
-            onCloseRequest = ::exitApplication,
+            onCloseRequest = {
+                // 1. Get the VPNLauncher from Koin
+                val launcher = GlobalContext.get().get<VPNLauncherInterface>()
+
+                // 2. Perform cleanup before exiting
+                launcher.stopVPN()
+
+                // 3. Close the app
+                exitApplication()
+            },
             state = windowState,
             title = "KMP VPN",
             undecorated = true,

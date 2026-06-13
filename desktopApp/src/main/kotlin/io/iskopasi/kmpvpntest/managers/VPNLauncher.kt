@@ -17,6 +17,15 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
     private var vpnProcess: Process? = null
     private var debugStreamHandler: Thread? = null
 
+    init {
+        Runtime.getRuntime()
+            .addShutdownHook(Thread {
+                println("[VPNLauncher] JVM shutting down, cleaning up...")
+                cleanup()
+            }
+            )
+    }
+
     private fun extractResource(resourceName: String): File {
         val file = File(workDir, resourceName)
         if (!file.exists()) {
