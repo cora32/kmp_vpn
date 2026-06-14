@@ -57,7 +57,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
             password = proxyData.password,
             logLevel = "debug",
             interfaceName = interfaceName,
-            routeAllAppsIntoVPN = prefStore.allowAllApps,
+            isDefaultRouteVPN = prefStore.allowAllApps,
             allowedPackages = prefStore.allowedApps
         )
         val configFile = File(workDir, "config.json").apply { writeText(config) }
@@ -81,12 +81,19 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
 
         signalManager.onConnected()
 
+        val logFile = File(workDir, "logs.txt")
         debugStreamHandler = Thread {
             try {
                 vpnProcess?.inputStream?.bufferedReader()?.use { reader ->
-                    while (!Thread.currentThread().isInterrupted) {
-                        val line = reader.readLine() ?: break
-                        println("[SINGBOX] $line")
+                    logFile.bufferedWriter().use { writer ->
+                        while (!Thread.currentThread().isInterrupted) {
+                            val line = reader.readLine() ?: break
+                            val logLine = "[SINGBOX] $line"
+                            println(logLine)
+                            writer.write(logLine)
+                            writer.newLine()
+                            writer.flush()
+                        }
                     }
                 }
             } catch (e: Exception) {

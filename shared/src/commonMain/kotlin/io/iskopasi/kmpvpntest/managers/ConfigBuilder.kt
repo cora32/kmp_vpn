@@ -1,5 +1,7 @@
 package io.iskopasi.kmpvpntest.managers
 
+import io.iskopasi.kmpvpntest.e
+
 private const val hostPlaceholder = "%HOST%"
 private const val portPlaceholder = "%PORT%"
 private const val usernamePlaceholder = "%USERNAME%"
@@ -7,8 +9,10 @@ private const val passwordPlaceholder = "%PASSWORD%"
 private const val logPlaceholder = "%LOG_LEVEL%"
 private const val allowedPackagesPlaceholder = "%APPS%"
 private const val interfaceNamePlaceholder = "%INTERFACE_NAME%"
+private const val finalOutboundPlaceholder = "%FINAL_OUTBOUND%"
+private const val rulesPlaceholder = "%RULES%"
 
-val allowAllApps = """
+val allowAllAppsAndroid = """
     {
                       "log": {
                         "level": "$logPlaceholder"
@@ -62,68 +66,7 @@ val allowAllApps = """
                     }
 """.trimIndent()
 
-val allowAllAppsDesktop = """
-{
-  "log": {
-    "level": "trace"
-  },
-  "dns": {
-    "servers": [
-      {
-        "type": "https",
-        "tag": "cloudflare",
-        "server": "1.1.1.1",
-        "path": "/dns-query",
-        "detour": "proxy"
-      }
-    ],
-    "rules": [
-      {
-        "server": "cloudflare"
-      }
-    ]
-  },
-  "inbounds": [
-    {
-      "type": "tun",
-      "tag": "tun-in",
-      "interface_name": "$interfaceNamePlaceholder",
-      "address": [
-        "172.19.0.1/30"
-      ],
-      "auto_route": true,
-      "strict_route": true,
-      "stack": "gvisor",
-      "mtu": 1400
-    }
-  ],
-  "outbounds": [
-    {
-      "type": "socks",
-      "tag": "proxy",
-      "server": "$hostPlaceholder",
-      "server_port": $portPlaceholder,
-      "username": "$usernamePlaceholder",
-      "password": "$passwordPlaceholder"
-    },
-    {
-      "type": "direct",
-      "tag": "direct"
-    }
-  ],
-  "route": {
-    "rules": [
-      {
-        "action": "hijack-dns",
-        "port": 53
-      }
-    ],
-    "final": "proxy"
-  }
-}
-""".trimIndent()
-
-val allowSelectedApps = """
+val allowSelectedAppsAndroid = """
     {
                       "log": {
                         "level": "$logPlaceholder"
@@ -181,6 +124,144 @@ val allowSelectedApps = """
                     }
 """.trimIndent()
 
+
+val allowAllAppsDesktop = """
+{
+  "log": {
+    "level": "$logPlaceholder"
+  },
+  "dns": {
+    "servers": [
+      {
+        "type": "https",
+        "tag": "cloudflare",
+        "server": "1.1.1.1",
+        "path": "/dns-query",
+        "detour": "proxy"
+      }
+    ],
+    "rules": [
+      {
+        "server": "cloudflare"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "$interfaceNamePlaceholder",
+      "address": [
+        "172.19.0.1/30"
+      ],
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "gvisor",
+      "mtu": 1400
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "socks",
+      "tag": "proxy",
+      "server": "$hostPlaceholder",
+      "server_port": $portPlaceholder,
+      "username": "$usernamePlaceholder",
+      "password": "$passwordPlaceholder"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "auto_detect_interface": true,
+    "rules": [
+      {
+        "action": "hijack-dns",
+        "port": 53
+      }
+      $rulesPlaceholder
+    ],
+    "final": "$finalOutboundPlaceholder"
+  }
+}
+""".trimIndent()
+
+val test = """
+    {
+      "log": {
+        "level": "debug"
+      },
+      "dns": {
+        "servers": [
+          {
+            "type": "https",
+            "tag": "cloudflare",
+            "server": "1.1.1.1",
+            "path": "/dns-query",
+            "detour": "proxy"
+          }
+        ],
+        "rules": [
+          {
+            "server": "cloudflare"
+          }
+        ]
+      },
+      "inbounds": [
+        {
+          "type": "tun",
+          "tag": "tun-in",
+          "interface_name": "KMPVPN_1781447255910",
+          "address": [
+            "172.19.0.1/30"
+          ],
+          "auto_route": true,
+          "strict_route": true,
+          "stack": "gvisor",
+          "mtu": 1400
+        }
+      ],
+      "outbounds": [
+        {
+          "type": "socks",
+          "tag": "proxy",
+          "server": "45.39.15.76",
+          "server_port": 6506,
+          "username": "kwfioenv",
+          "password": "vzt79p8cffy6"
+        },
+        {
+          "type": "direct",
+          "tag": "direct"
+        }
+      ],
+      "route": {
+        "auto_detect_interface": true,
+        "rules": [
+          {
+            "action": "hijack-dns",
+            "port": 53
+          },
+          {
+            "process_name": [
+              "firefox.exe"
+            ],
+            "outbound": "proxy"
+          },
+          {
+            "process_name": [
+              "vivaldi.exe"
+            ],
+            "outbound": "direct"
+          }
+        ],
+        "final": "direct"
+      }
+    }
+""".trimIndent()
+
 class ConfigBuilder {
     companion object {
         fun getSocks5Config(
@@ -193,7 +274,7 @@ class ConfigBuilder {
             routeAllAppsIntoVPN: Boolean
         ): String {
             if (routeAllAppsIntoVPN)
-                return allowAllApps
+                return allowAllAppsAndroid
                     .replace(hostPlaceholder, host)
                     .replace(portPlaceholder, port)
                     .replace(usernamePlaceholder, username)
@@ -202,7 +283,7 @@ class ConfigBuilder {
             else {
                 val packagesJson = allowedPackages.joinToString("\", \"", "\"", "\"")
 
-                return allowSelectedApps
+                return allowSelectedAppsAndroid
                     .replace(hostPlaceholder, host)
                     .replace(portPlaceholder, port)
                     .replace(usernamePlaceholder, username)
@@ -220,8 +301,23 @@ class ConfigBuilder {
             logLevel: String,
             interfaceName: String,
             allowedPackages: Set<String> = emptySet(),
-            routeAllAppsIntoVPN: Boolean
+            isDefaultRouteVPN: Boolean
         ): String {
+            val (finalOutbound, rules) = if (isDefaultRouteVPN) {
+                "proxy" to ""
+            } else {
+                val packagesJson = allowedPackages.joinToString("\", \"", "\"", "\"")
+                "direct" to """,
+                    {
+                        "process_name": [$packagesJson],
+                        "outbound": "proxy"
+                    }
+                """.trimIndent()
+            }
+
+            "[ConfigBuilder] Default route: $finalOutbound; rules: $rules".e
+            "[ConfigBuilder] allowedPackages: $allowedPackages; routeAllAppsIntoVPN: $isDefaultRouteVPN".e
+
             return allowAllAppsDesktop
                 .replace(hostPlaceholder, host)
                 .replace(portPlaceholder, port)
@@ -229,6 +325,8 @@ class ConfigBuilder {
                 .replace(passwordPlaceholder, password)
                 .replace(logPlaceholder, logLevel)
                 .replace(interfaceNamePlaceholder, interfaceName)
+                .replace(finalOutboundPlaceholder, finalOutbound)
+                .replace(rulesPlaceholder, rules)
         }
     }
 }

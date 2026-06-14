@@ -168,7 +168,7 @@ fun main() = application {
                     }
                 }
 
-                App(model = model.main)
+                App(root = model)
             }
         }
     }
