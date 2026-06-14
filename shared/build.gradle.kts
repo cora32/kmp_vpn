@@ -64,9 +64,10 @@ kotlin {
 
             // Ktor
             implementation("io.ktor:ktor-client-core:3.5.0")
+
+            implementation("io.ktor:ktor-client-okhttp:3.5.0")
         }
         jvmMain.dependencies {
-            implementation("io.ktor:ktor-client-cio:3.5.0")
             implementation("ch.qos.logback:logback-classic:1.5.34")
         }
         commonTest.dependencies {

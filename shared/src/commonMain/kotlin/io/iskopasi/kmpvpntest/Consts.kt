@@ -14,4 +14,4 @@ const val UsernameExtra = "UsernameExtra"
 const val PasswordExtra = "PasswordExtra"
 const val LogLevelExtra = "LogLevelExtra"
 
-const val JavaExe = "javaw.exe" // use java.exe to show debug logs
+const val JavaExe = "java.exe" // use java.exe to show debug logs

@@ -1,6 +1,7 @@
 package io.iskopasi.kmpvpntest.managers
 
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
+import io.iskopasi.kmpvpntest.e
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
@@ -46,6 +47,8 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
         val proxyData = prefStore.proxyData
         val interfaceName = "KMPVPN_${System.currentTimeMillis()}"
 
+        "--> proxyData: $proxyData".e
+
         // 1. Prepare Config
         val config = ConfigBuilder.getSocks5DesktopConfig(
             host = proxyData.host,
@@ -64,9 +67,13 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
         extractResource(resourceName = WintunDll)
 
         // 3. Launch
+        // We launch sing-box directly because the app itself is already running with admin privileges.
+        // This allows us to capture stdout/stderr which 'Start-Process' would detach.
         val pb = ProcessBuilder(
-            "powershell", "-Command",
-            "Start-Process '${exeFile.absolutePath}' -ArgumentList 'run -c ${configFile.name}' -Verb RunAs -WindowStyle Hidden"
+            exeFile.absolutePath,
+            "run",
+            "-c",
+            configFile.absolutePath
         )
         pb.directory(workDir)
         pb.redirectErrorStream(true)
