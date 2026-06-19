@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
                 }
             }
 
-            App(model = model.main)
+            App(root = model)
 
 //            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 //                RuntimePermissionsDialog(

@@ -16,6 +16,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +34,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,6 +64,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.iskopasi.kmpvpntest.api.SplitTunnelScreen
+import io.iskopasi.kmpvpntest.api.isAndroid
 import io.iskopasi.kmpvpntest.decompose.MainComponent
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.theme.CloudMinimal
@@ -68,7 +74,6 @@ import io.iskopasi.kmpvpntest.theme.CloudSimple
 import io.iskopasi.kmpvpntest.theme.CloudVolumetricWide
 import io.iskopasi.kmpvpntest.theme.dark
 import io.iskopasi.kmpvpntest.theme.light
-import io.iskopasi.splittunnel.ui.SplitTunnelUI
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.random.Random
 
@@ -108,85 +113,119 @@ fun App(root: RootComponent) {
         var showSplitTunnel by remember { mutableStateOf(false) }
 
         CompositionLocalProvider(LocalContentColor provides Color.White) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                AnimatedBackground()
-
-                if (showSplitTunnel) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                            Button(onClick = { showSplitTunnel = false }) {
-                                Text("Back")
-                            }
-                        }
-                        SplitTunnelUI(root.splitTunnel)
-                    }
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .safeContentPadding()
-                            .fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .drawBehind {
-                                    if (glowAlpha > 0f) {
-                                        drawCircle(
-                                            brush = Brush.radialGradient(
-                                                colors = listOf(
-                                                    Color.White.copy(alpha = glowAlpha),
-                                                    Color.Transparent
-                                                ),
-                                                center = center,
-                                                radius = size.width * pulseScale
-                                            ),
-                                            radius = size.width * pulseScale
-                                        )
-                                    }
-                                },
-                            shape = CircleShape,
-                            color = moonColor,
-                            shadowElevation = if (isConnected) 24.dp else 8.dp,
-                            tonalElevation = 4.dp
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
+                bottomBar = {
+                    if (isAndroid) {
+                        NavigationBar(
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                            contentColor = Color.White
                         ) {
-                            Button(
-                                modifier = Modifier.fillMaxSize(),
-                                onClick = model::onConnect,
-                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                    containerColor = Color.Transparent,
-                                    contentColor = if (isConnected) Color.Black else Color.White
-                                )
-                            ) {
-                                val stateText = when (state) {
-                                    MainComponent.State.Idle -> "Idle"
-                                    MainComponent.State.Connecting -> "Connecting"
-                                    MainComponent.State.Connected -> "Connected"
-                                    else -> "Idle"
-                                }
-                                Text(
-                                    stateText,
-                                    style = TextStyle(
-                                        fontSize = 14.sp,
-                                        textAlign = TextAlign.Center
-                                    )
-                                )
-                            }
+                            NavigationBarItem(
+                                selected = !showSplitTunnel,
+                                onClick = { showSplitTunnel = false },
+                                icon = { Icon(CloudSimple, contentDescription = null) },
+                                label = { Text("VPN") }
+                            )
+                            NavigationBarItem(
+                                selected = showSplitTunnel,
+                                onClick = { showSplitTunnel = true },
+                                icon = { Icon(CloudPuffy, contentDescription = null) },
+                                label = { Text("Split Tunnel") }
+                            )
                         }
+                    }
+                }
+            ) { padding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(if (isAndroid) padding else PaddingValues(0.dp))
+                ) {
+                    AnimatedBackground()
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                    if (showSplitTunnel) {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                                if (!isAndroid) {
+                                    Button(onClick = { showSplitTunnel = false }) {
+                                        Text("Back")
+                                    }
+                                }
+                            }
+                            SplitTunnelScreen(root.splitTunnel)
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .safeContentPadding()
+                                .fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .drawBehind {
+                                        if (glowAlpha > 0f) {
+                                            drawCircle(
+                                                brush = Brush.radialGradient(
+                                                    colors = listOf(
+                                                        Color.White.copy(alpha = glowAlpha),
+                                                        Color.Transparent
+                                                    ),
+                                                    center = center,
+                                                    radius = size.width * pulseScale
+                                                ),
+                                                radius = size.width * pulseScale
+                                            )
+                                        }
+                                    },
+                                shape = CircleShape,
+                                color = moonColor,
+                                shadowElevation = if (isConnected) 24.dp else 8.dp,
+                                tonalElevation = 4.dp
+                            ) {
+                                Button(
+                                    modifier = Modifier.fillMaxSize(),
+                                    onClick = model::onConnect,
+                                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent,
+                                        contentColor = if (isConnected) Color.Black else Color.White
+                                    )
+                                ) {
+                                    val stateText = when (state) {
+                                        MainComponent.State.Idle -> "Idle"
+                                        MainComponent.State.Connecting -> "Connecting"
+                                        MainComponent.State.Connected -> "Connected"
+                                        else -> "Idle"
+                                    }
+                                    Text(
+                                        stateText,
+                                        style = TextStyle(
+                                            fontSize = 14.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    )
+                                }
+                            }
 
-                        ErrorBlock(model = model)
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                            ErrorBlock(model = model)
 
-                        ProxyBlock(model = model)
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                            ProxyBlock(model = model)
 
-                        Button(onClick = { showSplitTunnel = true }) {
-                            Text("Split Tunneling Settings")
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            if (!isAndroid) {
+                                Button(onClick = { showSplitTunnel = true }) {
+                                    Text("Split Tunneling Settings")
+                                }
+                            }
                         }
                     }
                 }

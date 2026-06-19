@@ -1,6 +1,6 @@
 package io.iskopasi.kmpvpntest.managers
 
-import io.iskopasi.kmpvpntest.e
+import io.iskopasi.kmpvpntest.api.e
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 

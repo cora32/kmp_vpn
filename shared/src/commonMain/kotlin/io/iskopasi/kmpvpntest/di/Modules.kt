@@ -8,6 +8,8 @@ import io.iskopasi.kmpvpntest.managers.PingApi
 import io.iskopasi.kmpvpntest.managers.PingApiImpl
 import io.iskopasi.kmpvpntest.managers.ProxyManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
+import io.iskopasi.splittunnel.managers.AppManager
+import io.iskopasi.splittunnel.managers.getAppManager
 import org.koin.dsl.module
 
 fun getModules() = module {
@@ -29,5 +31,8 @@ fun getModules() = module {
     }
     factory<PingApi> {
         PingApiImpl()
+    }
+    factory<AppManager> {
+        getAppManager()
     }
 }

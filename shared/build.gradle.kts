@@ -42,6 +42,7 @@ kotlin {
             implementation("io.ktor:ktor-client-okhttp:3.5.0")
         }
         commonMain.dependencies {
+            api(projects.utils)
             implementation(projects.shared.splittunnel)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

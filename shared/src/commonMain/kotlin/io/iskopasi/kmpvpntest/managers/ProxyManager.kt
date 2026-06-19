@@ -2,26 +2,8 @@ package io.iskopasi.kmpvpntest.managers
 
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-
-@Serializable
-data class ProxyData(
-    val host: String,
-    val port: String,
-    val username: String,
-    val password: String
-) {
-    companion object {
-        val empty = ProxyData(
-            host = "",
-            port = "",
-            username = "",
-            password = ""
-        )
-    }
-}
 
 class ProxyManager(
     val vpnApi: VPNLauncherInterface,

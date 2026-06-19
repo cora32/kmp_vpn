@@ -19,7 +19,7 @@ import io.iskopasi.kmpvpntest.StartCommand
 import io.iskopasi.kmpvpntest.StopCommand
 import io.iskopasi.kmpvpntest.UsernameExtra
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
-import io.iskopasi.kmpvpntest.e
+import io.iskopasi.kmpvpntest.api.e
 import io.iskopasi.kmpvpntest.managers.ConfigBuilder
 import io.iskopasi.kmpvpntest.managers.NManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
@@ -120,7 +120,7 @@ class VPNServiceImpl : VpnService(),
                     username = username,
                     password = password,
                     logLevel = "debug",
-                    routeAllAppsIntoVPN = prefStoreApi.allowAllApps,
+                    routeAllAppsIntoVPN = prefStoreApi.routeAllApps,
                     allowedPackages = prefStoreApi.allowedApps
                 ).e
 
@@ -245,7 +245,7 @@ class VPNServiceImpl : VpnService(),
         builder.addRoute(DefaultRoute, 0)
 
         val allowedApps = prefStoreApi.allowedApps
-        val routeAllApps = prefStoreApi.allowAllApps
+        val routeAllApps = prefStoreApi.routeAllApps
         if (routeAllApps) {
             builder.addDisallowedApplication(packageName)
         } else if (allowedApps.isNotEmpty()) {

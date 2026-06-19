@@ -1,7 +1,7 @@
 package io.iskopasi.kmpvpntest.managers
 
 import io.iskopasi.kmpvpntest.Ipify
-import io.iskopasi.kmpvpntest.e
+import io.iskopasi.kmpvpntest.api.e
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.timeout

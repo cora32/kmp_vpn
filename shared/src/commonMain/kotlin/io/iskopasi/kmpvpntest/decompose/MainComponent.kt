@@ -2,7 +2,7 @@ package io.iskopasi.kmpvpntest.decompose
 
 import com.arkivanov.decompose.ComponentContext
 import io.iskopasi.kmpvpntest.api.PermissionsApi
-import io.iskopasi.kmpvpntest.e
+import io.iskopasi.kmpvpntest.api.e
 import io.iskopasi.kmpvpntest.managers.ProxyManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
 import kotlinx.coroutines.CoroutineScope

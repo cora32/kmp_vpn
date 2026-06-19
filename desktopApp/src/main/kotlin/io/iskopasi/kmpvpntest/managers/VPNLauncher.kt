@@ -1,7 +1,7 @@
 package io.iskopasi.kmpvpntest.managers
 
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
-import io.iskopasi.kmpvpntest.e
+import io.iskopasi.kmpvpntest.api.e
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
@@ -57,7 +57,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
             password = proxyData.password,
             logLevel = "debug",
             interfaceName = interfaceName,
-            isDefaultRouteVPN = prefStore.allowAllApps,
+            isDefaultRouteVPN = prefStore.routeAllApps,
             allowedPackages = prefStore.allowedApps
         )
         val configFile = File(workDir, "config.json").apply { writeText(config) }

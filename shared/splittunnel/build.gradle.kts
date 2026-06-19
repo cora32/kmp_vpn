@@ -22,6 +22,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(projects.utils)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -31,6 +32,9 @@ kotlin {
             api("com.arkivanov.decompose:decompose:3.5.0")
             api("com.arkivanov.essenty:lifecycle:2.5.0")
             implementation("com.arkivanov.decompose:extensions-compose:3.5.0")
+
+            // Koin
+            api("io.insert-koin:koin-core:3.2.0")
         }
         jvmMain.dependencies {
         }
