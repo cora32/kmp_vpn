@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -25,15 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import io.iskopasi.splittunnel.decompose.SplitTunnelComponent
 
 @Composable
 actual fun SplitTunnelScreen(
     component: SplitTunnelComponent
 ) {
-    val selectedApps by component.selectedAppsFlow.collectAsStateWithLifecycle()
-    val runningProcesses by component.runningProcessesFlow.collectAsStateWithLifecycle()
+    val model by component.model.subscribeAsState()
+    val selectedApps = model.selectedApps
+    val runningProcesses = model.runningProcesses
     var showProcessDialog by remember { mutableStateOf(false) }
 
     Column(

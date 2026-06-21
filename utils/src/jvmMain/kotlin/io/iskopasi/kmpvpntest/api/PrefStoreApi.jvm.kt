@@ -35,6 +35,7 @@ class DesktopPrefStoreApi : PrefStoreApi {
         set(value) {
             prefs.putBoolean("allow_all_apps", value)
         }
+    override var showSystemApps: Boolean = true
 }
 
 actual fun getPrefStore(): PrefStoreApi = DesktopPrefStoreApi()
