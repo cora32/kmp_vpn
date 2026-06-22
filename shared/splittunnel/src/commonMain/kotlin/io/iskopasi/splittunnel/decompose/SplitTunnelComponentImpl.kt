@@ -40,7 +40,7 @@ class SplitTunnelComponentImpl(
     override val routeAllAppsFlow = _routeAllAppsFlow.asStateFlow()
     override val showSystemAppsFlow = _showSystemAppsFlow.asStateFlow()
     override val appList = _appList.asStateFlow()
-    override val loading = _loading.asStateFlow()
+    override val isLoading = _loading.asStateFlow()
 
     private var currentAppList = listOf<AppManagerData>()
 
@@ -104,19 +104,22 @@ class SplitTunnelComponentImpl(
         }
 
         prefStore.showSystemApps = value
+
+        resortAppList(showSystemApp = value)
     }
 
     override fun onCheckApp(packageName: String, value: Boolean) {
         selectedAppsMap[packageName] = value
         onAppListChanged(selectedAppsMap.filterValues { it }.keys)
 
-        resortAppList()
+        resortAppList(showSystemApp = _showSystemAppsFlow.value)
     }
 
-    private fun resortAppList() {
+    private fun resortAppList(showSystemApp: Boolean) {
         val sorted = currentAppList.map {
             it.copy(isChecked = selectedAppsMap[it.packageName] ?: false)
         }
+            .filter { it.isSystemApp == showSystemApp }
             .sortedWith(compareByDescending<AppManagerData> { it.isChecked }.thenBy { it.name.lowercase() })
 
         _appList.update {
@@ -137,7 +140,7 @@ class SplitTunnelComponentImpl(
 
             currentAppList = allApps
 
-            resortAppList()
+            resortAppList(showSystemApp = _showSystemAppsFlow.value)
 
             _loading.update {
                 false

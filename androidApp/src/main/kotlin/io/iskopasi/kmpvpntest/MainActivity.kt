@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.defaultComponentContext
 import io.iskopasi.kmpvpntest.api.PermissionsApi
+import io.iskopasi.kmpvpntest.api.initializeCoil
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -24,6 +25,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
+        initializeCoil(this)
         super.onCreate(savedInstanceState)
 
         val model = RootComponent(

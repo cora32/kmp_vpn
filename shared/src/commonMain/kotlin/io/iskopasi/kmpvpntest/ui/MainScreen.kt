@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -55,7 +56,7 @@ import io.iskopasi.kmpvpntest.theme.cWhite
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier, component: MainComponent) {
+fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding: PaddingValues) {
     val state by component.state.collectAsStateWithLifecycle()
 
     val isConnected = state == MainComponent.State.Connected

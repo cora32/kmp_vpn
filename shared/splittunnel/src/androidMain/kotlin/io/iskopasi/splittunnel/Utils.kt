@@ -31,7 +31,7 @@ suspend fun getAllApps(
             AppManagerData(
                 name = appInfo.loadLabel(pm).toString(),
                 packageName = appInfo.packageName,
-                icon = appInfo.loadIcon(pm),
+                icon = appInfo,
                 isSystemApp = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0,
                 isChecked = selectedAppsMap.getOrDefault(appInfo.packageName, false)
             )

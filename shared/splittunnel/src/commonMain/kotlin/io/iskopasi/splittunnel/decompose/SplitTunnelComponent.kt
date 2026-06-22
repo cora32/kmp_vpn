@@ -15,7 +15,7 @@ data class AndroidAppData(
 
 interface SplitTunnelComponent {
     val model: Value<Model>
-    val loading: StateFlow<Boolean>
+    val isLoading: StateFlow<Boolean>
     val appList: StateFlow<List<AppManagerData>>
     val showSystemAppsFlow: StateFlow<Boolean>
     val routeAllAppsFlow: StateFlow<Boolean>

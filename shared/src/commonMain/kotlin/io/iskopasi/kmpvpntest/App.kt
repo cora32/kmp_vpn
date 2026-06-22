@@ -2,9 +2,11 @@
 
 package io.iskopasi.kmpvpntest
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -28,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
@@ -47,6 +50,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import kotlin.random.Random
 
 @kotlinx.serialization.Serializable
 sealed interface Screen : NavKey {
@@ -67,6 +71,34 @@ private val navConfig = SavedStateConfiguration {
 }
 
 @Composable
+fun DotBackground() {
+    val dotColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+    val dotSize = 12.dp
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val sizePx = dotSize.toPx()
+        val spacing = sizePx * 4
+        val random = Random(42) // Seeded random for consistency
+
+        for (x in 0..(size.width / spacing).toInt()) {
+            for (y in 0..(size.height / spacing).toInt()) {
+                val offsetX = (random.nextFloat() - 0.5f) * spacing * 0.6f
+                val offsetY = (random.nextFloat() - 0.5f) * spacing * 0.6f
+
+                drawCircle(
+                    color = dotColor,
+                    radius = sizePx / 2f,
+                    center = Offset(
+                        x = x * spacing + spacing / 2f + offsetX,
+                        y = y * spacing + spacing / 2f + offsetY
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun App(root: RootComponent) {
     MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) dark else light
@@ -76,10 +108,15 @@ fun App(root: RootComponent) {
         val isSplitSelected by remember(backStack.last()) { mutableStateOf(backStack.last() == Screen.SplitTunnel) }
 
         CompositionLocalProvider(LocalContentColor provides Color.White) {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                bottomBar = {
+            Box(
+                modifier = Modifier.fillMaxSize()
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                DotBackground()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = Color.Transparent,
+                    bottomBar = {
                     NavigationBar(
                         containerColor = Color.Transparent,
                     ) {
@@ -147,12 +184,24 @@ fun App(root: RootComponent) {
             ) { padding ->
                 NavDisplay(backStack = backStack) { key ->
                     when (key) {
-                        is Screen.Main -> NavEntry(key) { MainScreen(component = root.main) }
-                        is Screen.SplitTunnel -> NavEntry(key) { SplitTunnelScreen(root.splitTunnel) }
+                        is Screen.Main -> NavEntry(key) {
+                            MainScreen(
+                                component = root.main,
+                                padding = padding
+                            )
+                        }
+
+                        is Screen.SplitTunnel -> NavEntry(key) {
+                            SplitTunnelScreen(
+                                component = root.splitTunnel,
+                                padding = padding
+                            )
+                        }
                         else -> error("Unknown screen: $key")
                     }
                 }
             }
         }
     }
+}
 }

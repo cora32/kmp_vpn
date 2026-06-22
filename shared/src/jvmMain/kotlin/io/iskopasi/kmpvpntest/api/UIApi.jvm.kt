@@ -3,6 +3,7 @@ package io.iskopasi.kmpvpntest.api
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +32,8 @@ import io.iskopasi.splittunnel.decompose.SplitTunnelComponent
 
 @Composable
 actual fun SplitTunnelScreen(
-    component: SplitTunnelComponent
+    component: SplitTunnelComponent,
+    padding: PaddingValues
 ) {
     val model by component.model.subscribeAsState()
     val selectedApps = model.selectedApps
