@@ -68,6 +68,10 @@ kotlin {
             implementation("io.ktor:ktor-client-core:3.5.0")
 
             implementation("io.ktor:ktor-client-okhttp:3.5.0")
+
+            // Nav3
+            implementation("androidx.navigation3:navigation3-runtime:1.2.0-alpha04")
+            implementation("androidx.navigation3:navigation3-ui:1.2.0-alpha04")
         }
         jvmMain.dependencies {
             implementation("ch.qos.logback:logback-classic:1.5.34")
