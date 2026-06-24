@@ -1,6 +1,7 @@
 package io.iskopasi.splittunnel.decompose
 
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
+import io.iskopasi.kmpvpntest.api.e
 import io.iskopasi.splittunnel.managers.AppManager
 import io.iskopasi.splittunnel.managers.AppManagerData
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +37,8 @@ interface SplitTunnelComponent {
     fun toggleRouteAllApps(value: Boolean)
 
     fun onCheckApp(packageName: String, value: Boolean)
+
+    fun getAppList()
 }
 
 abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponent {
@@ -43,9 +46,6 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
     protected val appManager: AppManager by inject()
 
     protected val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    override val showSystemAppsFlow = MutableStateFlow(false).asStateFlow()
-    override val routeAllAppsFlow = MutableStateFlow(true).asStateFlow()
 
     private var currentAppList = listOf<AppManagerData>()
 
@@ -55,8 +55,11 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
 
     protected val _routeAllAppsFlow: MutableStateFlow<Boolean> =
         MutableStateFlow(prefStore.routeAllApps)
+    override val routeAllAppsFlow = _routeAllAppsFlow.asStateFlow()
     protected val _showSystemAppsFlow: MutableStateFlow<Boolean> =
         MutableStateFlow(prefStore.showSystemApps)
+
+    override val showSystemAppsFlow = _showSystemAppsFlow.asStateFlow()
     protected val _appList: MutableStateFlow<List<AppManagerData>> = MutableStateFlow(emptyList())
     override val appList = _appList.asStateFlow()
     protected val _allowedAppsFlow: MutableStateFlow<List<AppManagerData>> =
@@ -65,7 +68,7 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
     protected val _runningProcessesFlow = MutableStateFlow(emptyList<AppManagerData>())
     override val runningProcessesFlow = _runningProcessesFlow
 
-    protected fun getAppList() {
+    override fun getAppList() {
         _isLoading.update {
             true
         }
@@ -132,6 +135,7 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
     }
 
     override fun toggleRouteAllApps(value: Boolean) {
+        "===> toggleShowSystemApps: $value".e
         _routeAllAppsFlow.update {
             value
         }

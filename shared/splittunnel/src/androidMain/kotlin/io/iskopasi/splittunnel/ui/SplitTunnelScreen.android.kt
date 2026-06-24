@@ -24,6 +24,7 @@ import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonColors
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +56,10 @@ actual fun SplitTunnelScreen(component: SplitTunnelComponent, padding: PaddingVa
     val showSystemApps by component.showSystemAppsFlow.collectAsStateWithLifecycle()
     val routeAllApps by component.routeAllAppsFlow.collectAsStateWithLifecycle()
     val isLoading by component.isLoading.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        component.getAppList()
+    }
 
     Box(
         modifier = Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())

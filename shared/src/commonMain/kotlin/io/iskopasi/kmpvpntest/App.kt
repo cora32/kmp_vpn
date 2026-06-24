@@ -126,7 +126,7 @@ fun App(root: RootComponent) {
                         Spacer(Modifier.weight(1f))
                         Row(
                             modifier = Modifier
-                                .padding(bottom = 8.dp).width(250.dp).height(50.dp)
+                                .padding(bottom = 8.dp).width(220.dp).height(55.dp)
                                 .border(
                                     width = 0.4.dp,
                                     color = cWhite.copy(alpha = 0.3f),

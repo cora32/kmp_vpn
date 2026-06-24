@@ -39,6 +39,32 @@ class PingApiImpl : PingApi {
                     Proxy.Type.SOCKS,
                     InetSocketAddress(proxyData.host, proxyData.port.toInt())
                 )
+
+
+                // Disabling cert checks for testing purposes
+//                val trustAllCerts = object : X509TrustManager {
+//                    override fun checkClientTrusted(
+//                        chain: Array<out X509Certificate>?,
+//                        authType: String?
+//                    ) {
+//                    }
+//
+//                    override fun checkServerTrusted(
+//                        chain: Array<out X509Certificate>?,
+//                        authType: String?
+//                    ) {
+//                    }
+//
+//                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+//                }
+//
+//                val sslContext = SSLContext.getInstance("SSL")
+//                sslContext.init(null, arrayOf(trustAllCerts), SecureRandom())
+//
+//                config {
+//                    sslSocketFactory(sslContext.socketFactory, trustAllCerts)
+//                    hostnameVerifier { _, _ -> true }
+//                }
             }
         }
     }

@@ -15,8 +15,6 @@ class SplitTunnelComponentDesktop(
 ) : SplitTunnelComponentAbstract(), ComponentContext by componentContext, KoinComponent {
 
     init {
-        getAppList()
-
         scope.launch {
             _allowedAppsFlow.update {
                 prefStore.allowedApps.map {

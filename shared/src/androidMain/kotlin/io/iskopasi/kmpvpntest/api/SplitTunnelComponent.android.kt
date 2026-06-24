@@ -9,8 +9,6 @@ import org.koin.core.component.KoinComponent
 class SplitTunnelComponentAndroid(
     componentContext: ComponentContext
 ) : SplitTunnelComponentAbstract(), ComponentContext by componentContext, KoinComponent {
-
-
     override fun onCheckApp(packageName: String, value: Boolean) {
         allowedAppsMap[packageName] = value
         onAppListChanged(allowedAppsMap.filterValues { it }.keys)
