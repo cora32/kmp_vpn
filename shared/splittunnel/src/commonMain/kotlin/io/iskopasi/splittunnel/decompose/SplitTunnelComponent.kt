@@ -51,7 +51,7 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isLoading = _isLoading.asStateFlow()
-    protected val allowedAppsMap = mutableMapOf<String, Boolean>()
+//    protected val allowedAppsMap = mutableMapOf<String, Boolean>()
 
     protected val _routeAllAppsFlow: MutableStateFlow<Boolean> =
         MutableStateFlow(prefStore.routeAllApps)
@@ -68,6 +68,16 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
     protected val _runningProcessesFlow = MutableStateFlow(emptyList<AppManagerData>())
     override val runningProcessesFlow = _runningProcessesFlow
 
+//    init {
+//        restoreAllowedMap()
+//    }
+//
+//    private fun restoreAllowedMap() {
+//        prefStore.allowedApps.forEach {
+//            allowedAppsMap[it] = true
+//        }
+//    }
+
     override fun getAppList() {
         _isLoading.update {
             true
@@ -75,7 +85,7 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
 
         scope.launch {
             val allApps = appManager.getApps(
-                selectedAppsMap = allowedAppsMap,
+                selectedAppsMap = emptyMap(),
                 showSystemApps = _showSystemAppsFlow.value
             )
 
@@ -104,12 +114,14 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
     }
 
     protected suspend fun resortAppList(showSystemApp: Boolean) = coroutineScope {
+        val allowedApps = prefStore.allowedApps
+
         val appsWithSystem = if (showSystemApp) currentAppList.map {
-            it.copy(isChecked = allowedAppsMap[it.packageName] ?: false)
+            it.copy(isChecked = allowedApps.contains(it.packageName))
         }
         else
             currentAppList.map {
-                it.copy(isChecked = allowedAppsMap[it.packageName] ?: false)
+                it.copy(isChecked = allowedApps.contains(it.packageName))
             }
                 .filter { !it.isSystemApp }
         val sorted = appsWithSystem

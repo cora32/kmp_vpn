@@ -10,10 +10,14 @@ class SplitTunnelComponentAndroid(
     componentContext: ComponentContext
 ) : SplitTunnelComponentAbstract(), ComponentContext by componentContext, KoinComponent {
     override fun onCheckApp(packageName: String, value: Boolean) {
-        allowedAppsMap[packageName] = value
-        onAppListChanged(allowedAppsMap.filterValues { it }.keys)
-
         scope.launch {
+            if (value)
+                prefStore.allowedApps += packageName
+            else
+                prefStore.allowedApps -= packageName
+
+            onAppListChanged(prefStore.allowedApps)
+
             resortAppList(showSystemApp = _showSystemAppsFlow.value)
         }
     }
