@@ -58,7 +58,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
             logLevel = "debug",
             interfaceName = interfaceName,
             isDefaultRouteVPN = prefStore.routeAllApps,
-            allowedPackages = prefStore.allowedApps
+            allowedPackages = prefStore.allowedAppsNamesOnly
         )
         val configFile = File(workDir, "config.json").apply { writeText(config) }
 

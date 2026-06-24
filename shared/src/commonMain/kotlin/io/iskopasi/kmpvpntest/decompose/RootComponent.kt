@@ -18,15 +18,5 @@ class RootComponent(
 
     val splitTunnel = SplitTunnelComponentImpl(
         componentContext = childContext("splitTunnel"),
-        initialApps = prefStore.allowedApps,
-        onAppListChanged = { apps ->
-            if (apps.isEmpty()) {
-                prefStore.routeAllApps = true
-                prefStore.allowedApps = emptySet()
-            } else {
-                prefStore.routeAllApps = false
-                prefStore.allowedApps = apps
-            }
-        }
     )
 }

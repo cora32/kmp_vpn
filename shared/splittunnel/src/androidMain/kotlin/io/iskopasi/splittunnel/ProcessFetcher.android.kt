@@ -1,3 +1,5 @@
 package io.iskopasi.splittunnel
 
-actual fun getRunningProcesses(): List<String> = emptyList()
+import io.iskopasi.splittunnel.managers.AppManagerData
+
+actual fun getRunningProcesses(): List<AppManagerData> = emptyList()

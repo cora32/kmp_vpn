@@ -1,9 +1,6 @@
 package io.iskopasi.splittunnel.decompose
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.value.MutableValue
-import com.arkivanov.decompose.value.Value
-import com.arkivanov.decompose.value.update
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.splittunnel.getRunningProcesses
 import io.iskopasi.splittunnel.managers.AppManager
@@ -12,6 +9,7 @@ import io.iskopasi.splittunnel.pickExeFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,14 +18,11 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class SplitTunnelComponentImpl(
-    componentContext: ComponentContext,
-    private val initialApps: Set<String>,
-    private val onAppListChanged: (Set<String>) -> Unit
-) : SplitTunnelComponent, ComponentContext by componentContext, KoinComponent {
+    componentContext: ComponentContext
+) : SplitTunnelComponentAbstract(), ComponentContext by componentContext, KoinComponent {
     private val prefStore: PrefStoreApi by inject()
     private val appManager: AppManager by inject()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
 
     private val _routeAllAppsFlow: MutableStateFlow<Boolean> =
         MutableStateFlow(prefStore.routeAllApps)
@@ -35,57 +30,92 @@ class SplitTunnelComponentImpl(
         MutableStateFlow(prefStore.showSystemApps)
     private val _appList: MutableStateFlow<List<AppManagerData>> = MutableStateFlow(emptyList())
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private val selectedAppsMap = mutableMapOf<String, Boolean>()
+    private val allowedAppsMap = mutableMapOf<String, Boolean>()
 
     override val routeAllAppsFlow = _routeAllAppsFlow.asStateFlow()
     override val showSystemAppsFlow = _showSystemAppsFlow.asStateFlow()
     override val appList = _appList.asStateFlow()
     override val isLoading = _loading.asStateFlow()
+    private val _runningProcessesFlow = MutableStateFlow(emptyList<AppManagerData>())
+    override val runningProcessesFlow = _runningProcessesFlow
 
     private var currentAppList = listOf<AppManagerData>()
+    private val _allowedAppsFlow: MutableStateFlow<List<AppManagerData>> =
+        MutableStateFlow(emptyList())
+    override val allowedAppsFlow = _allowedAppsFlow.asStateFlow()
 
     init {
-        initialApps.forEach {
-            selectedAppsMap[it] = true
-        }
         getAppList()
+
+        scope.launch {
+            _allowedAppsFlow.update {
+                prefStore.allowedApps.map {
+                    AppManagerData("", it, icon = null, isSystemApp = false, isChecked = true)
+                }
+            }
+        }
+    }
+
+    private fun onAppListChanged(apps: Set<String>) {
+        if (apps.isEmpty()) {
+            prefStore.routeAllApps = true
+            prefStore.allowedApps = emptySet()
+        } else {
+            prefStore.routeAllApps = false
+            prefStore.allowedApps = apps
+        }
     }
 
     // ==================== Desktop ====================
-    private val _model = MutableValue(
-        SplitTunnelComponent.Model(
-            selectedApps = initialApps.toList(),
-            runningProcesses = emptyList()
-        )
-    )
-    override val model: Value<SplitTunnelComponent.Model> = _model
 
-    override fun onAddApp(path: String) {
-        val fileName = if (path.contains("\\") || path.contains("/")) {
-            path.substringAfterLast("\\").substringAfterLast("/")
-        } else {
-            path
-        }
+    override fun getProcessList() {
+        scope.launch {
+            val processList = getRunningProcesses()
 
-        if (fileName.isNotEmpty() && !_model.value.selectedApps.contains(fileName)) {
-            _model.update { it.copy(selectedApps = it.selectedApps + fileName) }
-            onAppListChanged(_model.value.selectedApps.toSet())
+            _runningProcessesFlow.update {
+                processList
+            }
         }
     }
 
-    override fun onRemoveApp(path: String) {
-        _model.update { it.copy(selectedApps = it.selectedApps - path) }
-        onAppListChanged(_model.value.selectedApps.toSet())
+    override fun onAddApp(data: AppManagerData) {
+        scope.launch {
+            data.isChecked = true
+            prefStore.allowedApps += data.packageName
+
+            resortAppList(showSystemApp = true)
+
+            refreshAllowedFlow()
+        }
+    }
+
+    override fun onRemoveApp(data: AppManagerData) {
+        scope.launch {
+            data.isChecked = false
+            prefStore.allowedApps -= data.packageName
+
+            resortAppList(showSystemApp = true)
+
+            refreshAllowedFlow()
+        }
+    }
+
+    private fun refreshAllowedFlow() {
+        scope.launch {
+            _allowedAppsFlow.update {
+                prefStore.allowedApps.map {
+                    AppManagerData("", it, icon = null, isSystemApp = false, isChecked = true)
+                }
+            }
+        }
     }
 
     override fun onSelectFile() {
-        pickExeFile()?.let { onAddApp(it) }
+        pickExeFile()?.let {
+            onAddApp(AppManagerData("", it, icon = null, isSystemApp = false, isChecked = true))
+        }
     }
 
-    override fun onRefreshProcesses() {
-        val processes = getRunningProcesses()
-        _model.update { it.copy(runningProcesses = processes) }
-    }
     // ==================== /Desktop ====================
 
     // ==================== Android ====================
@@ -105,21 +135,30 @@ class SplitTunnelComponentImpl(
 
         prefStore.showSystemApps = value
 
-        resortAppList(showSystemApp = value)
+        scope.launch {
+            resortAppList(showSystemApp = value)
+        }
     }
 
     override fun onCheckApp(packageName: String, value: Boolean) {
-        selectedAppsMap[packageName] = value
-        onAppListChanged(selectedAppsMap.filterValues { it }.keys)
+        allowedAppsMap[packageName] = value
+        onAppListChanged(allowedAppsMap.filterValues { it }.keys)
 
-        resortAppList(showSystemApp = _showSystemAppsFlow.value)
+        scope.launch {
+            resortAppList(showSystemApp = _showSystemAppsFlow.value)
+        }
     }
 
-    private fun resortAppList(showSystemApp: Boolean) {
-        val sorted = currentAppList.map {
-            it.copy(isChecked = selectedAppsMap[it.packageName] ?: false)
+    private suspend fun resortAppList(showSystemApp: Boolean) = coroutineScope {
+        val appsWithSystem = if (showSystemApp) currentAppList.map {
+            it.copy(isChecked = allowedAppsMap[it.packageName] ?: false)
         }
-            .filter { it.isSystemApp == showSystemApp }
+        else
+            currentAppList.map {
+                it.copy(isChecked = allowedAppsMap[it.packageName] ?: false)
+            }
+                .filter { !it.isSystemApp }
+        val sorted = appsWithSystem
             .sortedWith(compareByDescending<AppManagerData> { it.isChecked }.thenBy { it.name.lowercase() })
 
         _appList.update {
@@ -134,7 +173,7 @@ class SplitTunnelComponentImpl(
 
         scope.launch {
             val allApps = appManager.getApps(
-                selectedAppsMap = selectedAppsMap,
+                selectedAppsMap = allowedAppsMap,
                 showSystemApps = _showSystemAppsFlow.value
             )
 

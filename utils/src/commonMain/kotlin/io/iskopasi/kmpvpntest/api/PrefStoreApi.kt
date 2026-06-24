@@ -6,6 +6,7 @@ import org.koin.core.component.KoinComponent
 interface PrefStoreApi : KoinComponent {
     var proxyData: ProxyData
     var allowedApps: Set<String>
+    var allowedAppsNamesOnly: Set<String>
     var routeAllApps: Boolean
     var showSystemApps: Boolean
 }

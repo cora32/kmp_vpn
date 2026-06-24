@@ -1,36 +1,23 @@
 package io.iskopasi.splittunnel.decompose
 
-import com.arkivanov.decompose.value.Value
-import io.iskopasi.splittunnel.IconType
 import io.iskopasi.splittunnel.managers.AppManagerData
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-
-data class AndroidAppData(
-    val name: String,
-    val packageName: String,
-    val icon: IconType,
-    val isSystemApp: Boolean,
-    val isChecked: Boolean
-)
+import kotlinx.coroutines.flow.asStateFlow
 
 interface SplitTunnelComponent {
-    val model: Value<Model>
     val isLoading: StateFlow<Boolean>
     val appList: StateFlow<List<AppManagerData>>
     val showSystemAppsFlow: StateFlow<Boolean>
     val routeAllAppsFlow: StateFlow<Boolean>
 
-    data class Model(
-        val selectedApps: List<String>,
-        val runningProcesses: List<String>,
-        // Android data
-        val appList: List<AndroidAppData> = emptyList()
-    )
+    val allowedAppsFlow: StateFlow<List<AppManagerData>>
+    val runningProcessesFlow: StateFlow<List<AppManagerData>>
 
-    fun onAddApp(path: String)
-    fun onRemoveApp(path: String)
+    fun onAddApp(data: AppManagerData)
+    fun onRemoveApp(data: AppManagerData)
     fun onSelectFile()
-    fun onRefreshProcesses()
+    fun getProcessList()
 
 
     // Android methods
@@ -39,4 +26,12 @@ interface SplitTunnelComponent {
     fun toggleRouteAllApps(value: Boolean)
 
     fun onCheckApp(packageName: String, value: Boolean)
+}
+
+abstract class SplitTunnelComponentAbstract : SplitTunnelComponent {
+    override val appList = MutableStateFlow(emptyList<AppManagerData>()).asStateFlow()
+    override val showSystemAppsFlow = MutableStateFlow(false).asStateFlow()
+    override val routeAllAppsFlow = MutableStateFlow(true).asStateFlow()
+    override val allowedAppsFlow = MutableStateFlow(emptyList<AppManagerData>()).asStateFlow()
+    override val runningProcessesFlow = MutableStateFlow(emptyList<AppManagerData>()).asStateFlow()
 }

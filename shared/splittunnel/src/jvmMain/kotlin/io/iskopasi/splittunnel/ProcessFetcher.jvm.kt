@@ -1,26 +1,27 @@
 package io.iskopasi.splittunnel
 
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import io.iskopasi.splittunnel.managers.AppManagerData
+import java.io.File
+import kotlin.streams.asSequence
 
-actual fun getRunningProcesses(): List<String> {
-    val processes = mutableSetOf<String>()
-    try {
-        val process = ProcessBuilder("tasklist", "/NH", "/FO", "CSV").start()
-        val reader = BufferedReader(InputStreamReader(process.inputStream))
-        var line: String?
-        while (reader.readLine().also { line = it } != null) {
-            val parts = line?.split(",") ?: continue
-            if (parts.isNotEmpty()) {
-                val name = parts[0].replace("\"", "").trim()
-                if (name.isNotEmpty()) {
-                    processes.add(name)
-                }
-            }
+actual fun getRunningProcesses(): List<AppManagerData> {
+    return ProcessHandle.allProcesses()
+        .asSequence()
+        .map { it.info().command() }
+        .filter { it.isPresent }
+        .map { it.get() }
+        .filter { it.isNotBlank() }
+        .map { path ->
+            val name = File(path).nameWithoutExtension
+            AppManagerData(
+                name = name,
+                packageName = path,
+                isSystemApp = false,
+                isChecked = false,
+                icon = ""
+            )
         }
-        process.waitFor()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return processes.toList().sortedBy { it.lowercase() }
+        .distinctBy { it.packageName }
+        .sortedBy { it.name.lowercase() }
+        .toList()
 }

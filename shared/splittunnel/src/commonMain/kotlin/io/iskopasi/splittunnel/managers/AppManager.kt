@@ -5,7 +5,7 @@ import io.iskopasi.splittunnel.IconType
 data class AppManagerData(
     val name: String,
     val packageName: String,
-    val icon: IconType,
+    val icon: IconType?,
     val isSystemApp: Boolean,
     var isChecked: Boolean
 )

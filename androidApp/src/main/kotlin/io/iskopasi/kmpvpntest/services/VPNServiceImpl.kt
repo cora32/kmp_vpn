@@ -121,7 +121,7 @@ class VPNServiceImpl : VpnService(),
                     password = password,
                     logLevel = "debug",
                     routeAllAppsIntoVPN = prefStoreApi.routeAllApps,
-                    allowedPackages = prefStoreApi.allowedApps
+                    allowedPackages = prefStoreApi.allowedAppsNamesOnly
                 ).e
 
                 // Configure control server
@@ -236,7 +236,7 @@ class VPNServiceImpl : VpnService(),
         return null
     }
 
-    private fun getBuilderBuilder(): Builder {
+    private fun getBuilder(): Builder {
         val builder = Builder()
         builder.addAddress(ClientIP, 24)
         builder.addDnsServer(DNSServer)
@@ -244,7 +244,7 @@ class VPNServiceImpl : VpnService(),
         builder.setMtu(1500)
         builder.addRoute(DefaultRoute, 0)
 
-        val allowedApps = prefStoreApi.allowedApps
+        val allowedApps = prefStoreApi.allowedAppsNamesOnly
         val routeAllApps = prefStoreApi.routeAllApps
         if (routeAllApps) {
             builder.addDisallowedApplication(packageName)
@@ -286,7 +286,7 @@ class VPNServiceImpl : VpnService(),
         if (options == null) return -1
 
         try {
-            val builder = getBuilderBuilder()
+            val builder = getBuilder()
 
             vpnInterface = builder.establish()
 

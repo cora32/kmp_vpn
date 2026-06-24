@@ -1,3 +1,5 @@
 package io.iskopasi.splittunnel
 
-expect fun getRunningProcesses(): List<String>
+import io.iskopasi.splittunnel.managers.AppManagerData
+
+expect fun getRunningProcesses(): List<AppManagerData>

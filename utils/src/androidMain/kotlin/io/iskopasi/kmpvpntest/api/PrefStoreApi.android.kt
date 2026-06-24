@@ -37,6 +37,17 @@ class AndroidPrefStoreApi() : PrefStoreApi {
             sp.edit(commit = true) {
                 putStringSet("allowed_apps", value)
             }
+
+            val namesOnly = value.map { it.substringAfterLast("\\") }
+            allowedAppsNamesOnly = namesOnly.toSet()
+        }
+
+    override var allowedAppsNamesOnly: Set<String>
+        get() = sp.getStringSet("allowed_apps_names_only", emptySet()) ?: emptySet()
+        set(value) {
+            sp.edit(commit = true) {
+                putStringSet("allowed_apps_names_only", value)
+            }
         }
 
     override var routeAllApps: Boolean

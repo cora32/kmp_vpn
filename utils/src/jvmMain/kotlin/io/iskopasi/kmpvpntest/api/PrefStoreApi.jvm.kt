@@ -28,6 +28,16 @@ class DesktopPrefStoreApi : PrefStoreApi {
         get() = prefs.get("allowed_apps", "").split(",").filter { it.isNotEmpty() }.toSet()
         set(value) {
             prefs.put("allowed_apps", value.joinToString(","))
+
+            val namesOnly = value.map { it.substringAfterLast("\\") }
+            allowedAppsNamesOnly = namesOnly.toSet()
+        }
+
+    override var allowedAppsNamesOnly: Set<String>
+        get() = prefs.get("allowed_apps_names_names", "").split(",").filter { it.isNotEmpty() }
+            .toSet()
+        set(value) {
+            prefs.put("allowed_apps_names_names", value.joinToString(","))
         }
 
     override var routeAllApps: Boolean
