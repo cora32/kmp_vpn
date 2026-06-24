@@ -35,6 +35,10 @@ kotlin {
 
             // Koin
             api("io.insert-koin:koin-core:3.2.0")
+
+            // Coil 3
+            api("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
+            api("io.coil-kt.coil3:coil-network-okhttp:3.0.0-rc01")
         }
         jvmMain.dependencies {
         }

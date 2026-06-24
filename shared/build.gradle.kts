@@ -72,10 +72,6 @@ kotlin {
             // Nav3
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.jetbrains.navigation3.ui)
-
-            // Coil 3
-            api("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
-            api("io.coil-kt.coil3:coil-network-okhttp:3.0.0-rc01")
         }
         jvmMain.dependencies {
             implementation("ch.qos.logback:logback-classic:1.5.34")

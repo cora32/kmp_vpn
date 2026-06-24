@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization") version "2.0.0"
 }
 
@@ -18,6 +20,9 @@ kotlin {
 
             //Koin
             api("io.insert-koin:koin-core:3.2.0")
+
+            // Compose
+            implementation(libs.compose.ui)
         }
         androidMain.dependencies {
             api(libs.androidx.core.ktx)

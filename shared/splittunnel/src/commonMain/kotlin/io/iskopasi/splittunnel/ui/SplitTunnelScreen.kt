@@ -1,4 +1,4 @@
-package io.iskopasi.kmpvpntest.api
+package io.iskopasi.splittunnel.ui
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable

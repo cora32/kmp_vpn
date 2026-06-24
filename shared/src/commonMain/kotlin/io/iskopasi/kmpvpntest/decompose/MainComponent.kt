@@ -111,6 +111,8 @@ class MainComponentImpl(
 
         permissionApi.requestPermissions()
 
+        clearErrors()
+
         scope.launch {
             combine(
                 permissionApi.isVPNGrantedFlow,
@@ -128,6 +130,10 @@ class MainComponentImpl(
                 }
             }
         }
+    }
+
+    private fun clearErrors() {
+        _errorMessage.update { "" }
     }
 
     private fun disconnect() {

@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -52,7 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.kmpvpntest.decompose.MainComponent
-import io.iskopasi.kmpvpntest.theme.cWhite
+import io.iskopasi.kmpvpntest.utils.theme.cWhite
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -216,7 +217,8 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                 flow = component.username,
                 onValueChange = component::onUsernameChanged,
                 isEnabled = isEnabled,
-                modifier = Modifier
+                modifier = Modifier,
+                placeholder = "Leave empty if no auth required"
             )
             Spacer(modifier = Modifier.height(8.dp))
             Input(
@@ -226,7 +228,8 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                 modifier = Modifier,
                 isEnabled = isEnabled,
                 imeAction = ImeAction.Done,
-                keyboardType = KeyboardType.Password
+                keyboardType = KeyboardType.Password,
+                placeholder = "Leave empty if no auth required"
             )
         }
     }
@@ -241,7 +244,8 @@ fun Input(
     onValueChange: (String) -> Unit,
     isEnabled: Boolean,
     imeAction: ImeAction = ImeAction.Next,
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    placeholder: String = ""
 ) {
     val value by flow.collectAsStateWithLifecycle()
     var isAnythingFocused by remember { mutableStateOf(false) }
@@ -282,7 +286,16 @@ fun Input(
                 cursorColor = cWhite,
             ),
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(text = "") },
+            placeholder = {
+                Text(
+                    text = placeholder, style = TextStyle(
+                        color = cWhite.copy(alpha = 0.4f),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.ExtraLight
+                    )
+                )
+            },
             onValueChange = onValueChange,
             singleLine = true,
             isError = isError,

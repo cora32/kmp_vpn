@@ -22,5 +22,3 @@ val dark = darkColorScheme(
     tertiary = Color(0xFFC08552),
     tertiaryContainer = Color(0xFFC08552),
 )
-
-val cWhite = Color(0xffFFF8F0)

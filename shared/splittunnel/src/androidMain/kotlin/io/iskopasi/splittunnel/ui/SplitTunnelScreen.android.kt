@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
-package io.iskopasi.kmpvpntest.api
+package io.iskopasi.splittunnel.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,10 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import io.iskopasi.kmpvpntest.theme.cWhite
+import io.iskopasi.kmpvpntest.utils.theme.cWhite
 import io.iskopasi.splittunnel.decompose.SplitTunnelComponent
 import io.iskopasi.splittunnel.managers.AppManagerData
-
 
 @ExperimentalMaterial3ExpressiveApi
 @Composable

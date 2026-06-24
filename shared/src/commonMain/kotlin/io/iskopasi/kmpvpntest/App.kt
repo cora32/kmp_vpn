@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalSerializationApi::class)
-
 package io.iskopasi.kmpvpntest
 
 import androidx.compose.foundation.Canvas
@@ -13,8 +11,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -38,30 +39,31 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
-import io.iskopasi.kmpvpntest.api.SplitTunnelScreen
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.theme.TablerRouteAltLeft
 import io.iskopasi.kmpvpntest.theme.TablerRouter
-import io.iskopasi.kmpvpntest.theme.cWhite
 import io.iskopasi.kmpvpntest.theme.dark
 import io.iskopasi.kmpvpntest.theme.light
 import io.iskopasi.kmpvpntest.ui.MainScreen
+import io.iskopasi.kmpvpntest.utils.theme.cWhite
+import io.iskopasi.splittunnel.ui.SplitTunnelScreen
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlin.random.Random
 
-@kotlinx.serialization.Serializable
+@Serializable
 sealed interface Screen : NavKey {
     @Serializable
     data object Main : Screen
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data object SplitTunnel : Screen
 }
 
 
+@OptIn(ExperimentalSerializationApi::class)
 private val navConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
@@ -98,6 +100,7 @@ fun DotBackground() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun App(root: RootComponent) {
     MaterialTheme(
@@ -120,11 +123,10 @@ fun App(root: RootComponent) {
                     NavigationBar(
                         containerColor = Color.Transparent,
                     ) {
-
                         Spacer(Modifier.weight(1f))
                         Row(
                             modifier = Modifier
-                                .padding(bottom = 8.dp).width(250.dp).height(60.dp)
+                                .padding(bottom = 8.dp).width(250.dp).height(50.dp)
                                 .border(
                                     width = 0.4.dp,
                                     color = cWhite.copy(alpha = 0.3f),
@@ -134,7 +136,8 @@ fun App(root: RootComponent) {
                                 .background(MaterialTheme.colorScheme.secondaryContainer)
                         ) {
                             NavigationBarItem(
-                                modifier = Modifier.fillMaxHeight()
+                                modifier = Modifier
+                                    .fillMaxHeight()
                                     .background(if (isMainSelected) Color.White else Color.Transparent),
                                 selected = isMainSelected,
                                 onClick = {
@@ -152,11 +155,18 @@ fun App(root: RootComponent) {
                                     disabledIconColor = MaterialTheme.colorScheme.primary,
                                     disabledTextColor = MaterialTheme.colorScheme.primary,
                                 ),
-                                icon = { Icon(TablerRouter, contentDescription = null) },
+                                icon = {
+                                    Icon(
+                                        TablerRouter,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                },
                                 label = { Text("VPN") }
                             )
                             NavigationBarItem(
-                                modifier = Modifier.fillMaxHeight()
+                                modifier = Modifier
+                                    .fillMaxHeight()
                                     .background(if (isSplitSelected) Color.White else Color.Transparent),
                                 selected = isSplitSelected,
                                 onClick = {
