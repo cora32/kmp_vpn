@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,6 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.SingletonImageLoader
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
 import io.iskopasi.splittunnel.decompose.SplitTunnelComponent
 import io.iskopasi.splittunnel.managers.AppManagerData
@@ -232,6 +236,13 @@ fun RunningProcessItemName(
             }),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        AsyncImage(
+            model = data.icon,
+            imageLoader = SingletonImageLoader.get(LocalPlatformContext.current),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp).padding(4.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             data.name,
             style = TextStyle(
@@ -269,6 +280,13 @@ fun RunningProcessItemPath(
             }),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        AsyncImage(
+            model = data.icon,
+            imageLoader = SingletonImageLoader.get(LocalPlatformContext.current),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp).padding(4.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             data.packageName,
             style = TextStyle(

@@ -26,6 +26,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import io.iskopasi.kmpvpntest.api.initializeCoil
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.di.getModules
 import io.iskopasi.kmpvpntest.managers.SingleInstanceManager
@@ -75,7 +76,7 @@ fun elevateProcess() {
 fun main() = application {
     // 1. State to track focus requests (using timestamp to ensure change detection)
     var focusTrigger by remember { mutableStateOf(0L) }
-    val windowState = rememberWindowState(width = 400.dp, height = 800.dp)
+    val windowState = rememberWindowState(width = 500.dp, height = 800.dp)
 
     // 2. Initialize Single Instance logic
     val controller = remember {
@@ -95,6 +96,8 @@ fun main() = application {
         elevateProcess() // We need this to clean our interfaces on cleanup
         return@application // Exit the non-admin process
     }
+
+    initializeCoil()
 
     startKoin {
         modules(

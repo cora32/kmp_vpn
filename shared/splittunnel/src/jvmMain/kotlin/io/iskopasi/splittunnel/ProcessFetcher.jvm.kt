@@ -18,7 +18,7 @@ actual fun getRunningProcesses(): List<AppManagerData> {
                 packageName = path,
                 isSystemApp = false,
                 isChecked = false,
-                icon = ""
+                icon = path // Path to exe serves as icon source for Coil on Windows
             )
         }
         .distinctBy { it.packageName }

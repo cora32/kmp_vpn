@@ -18,7 +18,7 @@ class SplitTunnelComponentDesktop(
         scope.launch {
             _allowedAppsFlow.update {
                 prefStore.allowedApps.map {
-                    AppManagerData("", it, icon = null, isSystemApp = false, isChecked = true)
+                    AppManagerData("", it, icon = it, isSystemApp = false, isChecked = true)
                 }
             }
         }
