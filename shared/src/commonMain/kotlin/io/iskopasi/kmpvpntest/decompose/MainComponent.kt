@@ -20,10 +20,10 @@ import org.koin.core.component.inject
 
 interface MainComponent {
     val state: StateFlow<State>
-    val host: StateFlow<String>
-    val port: StateFlow<String>
-    val username: StateFlow<String>
-    val password: StateFlow<String>
+    var host: String
+    var port: String
+    var username: String
+    var password: String
     val errorMessage: StateFlow<String>
 
     val isHostError: StateFlow<Boolean>
@@ -50,10 +50,6 @@ class MainComponentImpl(
     private val permissionApi: PermissionsApi by inject()
     private val signalManager: SignalManager by inject()
     private val _state = MutableStateFlow(MainComponent.State.Idle)
-    private val _host = MutableStateFlow(proxyManager.proxyData.host)
-    private val _port = MutableStateFlow(proxyManager.proxyData.port)
-    private val _username = MutableStateFlow(proxyManager.proxyData.username)
-    private val _password = MutableStateFlow(proxyManager.proxyData.password)
     private val _isHostError = MutableStateFlow(false)
     private val _isPortError = MutableStateFlow(false)
     private val _errorMessage = MutableStateFlow("")
@@ -61,10 +57,10 @@ class MainComponentImpl(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override val state = _state.asStateFlow()
-    override val host = _host.asStateFlow()
-    override val port = _port.asStateFlow()
-    override val username = _username.asStateFlow()
-    override val password = _password.asStateFlow()
+    override var host = proxyManager.proxyData.host
+    override var port = proxyManager.proxyData.port
+    override var username = proxyManager.proxyData.username
+    override var password = proxyManager.proxyData.password
     override val errorMessage = _errorMessage.asStateFlow()
     override val isHostError = _isHostError.asStateFlow()
     override val isPortError = _isPortError.asStateFlow()
@@ -104,8 +100,8 @@ class MainComponentImpl(
     }
 
     override fun onConnect() {
-        val isHostValid = validateHost(_host.value)
-        val isPortValid = validatePort(_port.value)
+        val isHostValid = validateHost(host)
+        val isPortValid = validatePort(port)
 
         if (!isHostValid || !isPortValid) return
 
@@ -178,33 +174,25 @@ class MainComponentImpl(
     }
 
     override fun onHostChanged(value: String) {
-        _host.update {
-            value
-        }
+        host = value
 
         proxyManager.setHost(value)
     }
 
     override fun onPortChanged(value: String) {
-        _port.update {
-            value
-        }
+        port = value
 
         proxyManager.setPort(value)
     }
 
     override fun onUsernameChanged(value: String) {
-        _username.update {
-            value
-        }
+        username = value
 
         proxyManager.setUsername(value)
     }
 
     override fun onPasswordChanged(value: String) {
-        _password.update {
-            value
-        }
+        password = value
 
         proxyManager.setPassword(value)
     }

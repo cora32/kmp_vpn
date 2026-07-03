@@ -1,6 +1,10 @@
 package io.iskopasi.kmpvpntest
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -31,7 +35,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
@@ -51,7 +54,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlin.random.Random
 
 @Serializable
 sealed interface Screen : NavKey {
@@ -73,31 +75,32 @@ private val navConfig = SavedStateConfiguration {
 }
 
 @Composable
-fun DotBackground() {
-    val dotColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-    val dotSize = 12.dp
+fun AnimatedBackground() {
+    val infiniteTransition = rememberInfiniteTransition(label = "BackgroundTransition")
 
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val sizePx = dotSize.toPx()
-        val spacing = sizePx * 4
-        val random = Random(42) // Seeded random for consistency
+    val backgroundColor by infiniteTransition.animateColor(
+        initialValue = Color(0xFF00E676), // Vibrant Green
+        targetValue = Color(0xFF00E676),
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 25000
+                Color(0xFF00E676) at 0 // Green
+                Color(0xFFFFB74D) at 5000 // Peach
+                Color(0xFF2979FF) at 10000 // Blue
+                Color(0xFFFF5252) at 15000 // Red
+                Color(0xFFFF6E40) at 20000 // Sunset
+                Color(0xFF00E676) at 25000 // Back to Green
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ColorCycle"
+    )
 
-        for (x in 0..(size.width / spacing).toInt()) {
-            for (y in 0..(size.height / spacing).toInt()) {
-                val offsetX = (random.nextFloat() - 0.5f) * spacing * 0.6f
-                val offsetY = (random.nextFloat() - 0.5f) * spacing * 0.6f
-
-                drawCircle(
-                    color = dotColor,
-                    radius = sizePx / 2f,
-                    center = Offset(
-                        x = x * spacing + spacing / 2f + offsetX,
-                        y = y * spacing + spacing / 2f + offsetY
-                    )
-                )
-            }
-        }
-    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundColor)
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -113,9 +116,8 @@ fun App(root: RootComponent) {
         CompositionLocalProvider(LocalContentColor provides Color.White) {
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.primaryContainer)
             ) {
-                DotBackground()
+                AnimatedBackground()
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = Color.Transparent,

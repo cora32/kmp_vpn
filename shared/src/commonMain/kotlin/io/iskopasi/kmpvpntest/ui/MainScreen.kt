@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -31,6 +33,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,21 +43,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.kmpvpntest.decompose.MainComponent
-import io.iskopasi.kmpvpntest.utils.theme.cWhite
-import kotlinx.coroutines.flow.StateFlow
+import io.iskopasi.kmpvpntest.utils.theme.cGray
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding: PaddingValues) {
@@ -143,9 +148,9 @@ fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding:
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ErrorBlock(component = component)
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            ErrorBlock(component = component)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -175,7 +180,6 @@ fun ErrorBlock(
 }
 
 @Composable
-@Preview(backgroundColor = 0xFFffffff)
 fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
     val isHostError by component.isHostError.collectAsStateWithLifecycle()
     val isPortError by component.isPortError.collectAsStateWithLifecycle()
@@ -183,54 +187,63 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
 
     val isEnabled = state == MainComponent.State.Idle
 
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center,
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        border = BorderStroke(width = 0.5.dp, color = Color.White.copy(alpha = 0.3f)),
+        color = Color(0xFFD7D7D7).copy(alpha = 0.9f),
+        contentColor = Color.Black,
+        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 8.dp,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
-            Input(
-                label = "IP (socks5 server)",
-                flow = component.host,
-                isError = isHostError,
-                onValueChange = component::onHostChanged,
-                isEnabled = isEnabled,
-                modifier = Modifier.weight(1f).padding(end = 8.dp),
-                keyboardType = KeyboardType.Number
-            )
-            Input(
-                label = "Port",
-                flow = component.port,
-                isError = isPortError,
-                onValueChange = component::onPortChanged,
-                isEnabled = isEnabled,
-                modifier = Modifier.width(80.dp),
-                keyboardType = KeyboardType.Number
-            )
-        }
-        Spacer(modifier = Modifier.height(32.dp))
-        Column {
-            Input(
-                label = "Username",
-                flow = component.username,
-                onValueChange = component::onUsernameChanged,
-                isEnabled = isEnabled,
-                modifier = Modifier,
-                placeholder = "Leave empty if no auth required"
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Input(
-                label = "Password",
-                flow = component.password,
-                onValueChange = component::onPasswordChanged,
-                modifier = Modifier,
-                isEnabled = isEnabled,
-                imeAction = ImeAction.Done,
-                keyboardType = KeyboardType.Password,
-                placeholder = "Leave empty if no auth required"
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Input(
+                    label = "IP (socks5)",
+                    initialValue = component.host,
+                    isError = isHostError,
+                    onValueChange = component::onHostChanged,
+                    isEnabled = isEnabled,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    keyboardType = KeyboardType.Number
+                )
+                Input(
+                    label = "Port",
+                    initialValue = component.port,
+                    isError = isPortError,
+                    onValueChange = component::onPortChanged,
+                    isEnabled = isEnabled,
+                    modifier = Modifier.width(80.dp),
+                    keyboardType = KeyboardType.Number
+                )
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+            Column {
+                Input(
+                    label = "Username",
+                    initialValue = component.username,
+                    onValueChange = component::onUsernameChanged,
+                    isEnabled = isEnabled,
+                    modifier = Modifier,
+                    placeholder = "Leave empty if no auth required"
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Input(
+                    label = "Password",
+                    initialValue = component.password,
+                    onValueChange = component::onPasswordChanged,
+                    modifier = Modifier,
+                    isEnabled = isEnabled,
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Password,
+                    placeholder = "Leave empty if no auth required"
+                )
+            }
         }
     }
 }
@@ -239,7 +252,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
 fun Input(
     modifier: Modifier = Modifier,
     label: String,
-    flow: StateFlow<String>,
+    initialValue: String,
     isError: Boolean = false,
     onValueChange: (String) -> Unit,
     isEnabled: Boolean,
@@ -247,56 +260,84 @@ fun Input(
     keyboardType: KeyboardType = KeyboardType.Text,
     placeholder: String = ""
 ) {
-    val value by flow.collectAsStateWithLifecycle()
-    var isAnythingFocused by remember { mutableStateOf(false) }
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(initialValue))
+    }
+    var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
-    Column(modifier = modifier.onFocusChanged { focusState ->
-        isAnythingFocused = focusState.hasFocus
-    }) {
+    LaunchedEffect(isFocused) {
+        if (isFocused) {
+            kotlinx.coroutines.delay(10.milliseconds)
+            textFieldValue = textFieldValue.copy(
+                selection = TextRange(0, textFieldValue.text.length)
+            )
+        }
+    }
+
+    Column(modifier = modifier) {
         Text(
             label,
             style = TextStyle(
                 fontSize = 12.sp,
                 color = when {
-                    !isEnabled -> cWhite.copy(alpha = 0.4f)
-                    isAnythingFocused -> cWhite
-                    else -> cWhite.copy(alpha = 0.4f)
+                    !isEnabled -> cGray.copy(alpha = 0.4f)
+                    isFocused -> Color.Unspecified
+                    else -> cGray.copy(alpha = 0.6f)
                 }
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         OutlinedTextField(
             enabled = isEnabled,
-            value = value,
+            value = textFieldValue,
+            onValueChange = {
+                textFieldValue = it
+                onValueChange(it.text)
+            },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
                 errorContainerColor = Color.Transparent,
-                focusedTextColor = cWhite,
-                unfocusedTextColor = cWhite.copy(alpha = 0.7f),
-                disabledTextColor = cWhite.copy(alpha = 0.4f),
+                focusedTextColor = cGray,
+                unfocusedTextColor = cGray.copy(alpha = 0.7f),
+                disabledTextColor = cGray.copy(alpha = 0.4f),
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
                 disabledBorderColor = Color.Transparent,
-                focusedLabelColor = cWhite,
-                unfocusedLabelColor = cWhite.copy(alpha = 0.7f),
-                disabledLabelColor = cWhite.copy(alpha = 0.4f),
-                cursorColor = cWhite,
+                focusedLabelColor = Color.Unspecified,
+                unfocusedLabelColor = cGray.copy(alpha = 0.7f),
+                disabledLabelColor = cGray.copy(alpha = 0.4f),
+                cursorColor = Color.Black,
             ),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    isFocused = it.isFocused
+                }
+                .drawBehind {
+                    if (isFocused) {
+                        val strokeWidth = 1.dp.toPx()
+                        val y = size.height - strokeWidth
+                        drawLine(
+                            color = Color.Black,
+                            start = Offset(0f, y),
+                            end = Offset(size.width, y),
+                            strokeWidth = strokeWidth
+                        )
+                    }
+                },
             placeholder = {
                 Text(
                     text = placeholder, style = TextStyle(
-                        color = cWhite.copy(alpha = 0.4f),
+                        color = cGray.copy(alpha = 0.4f),
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.ExtraLight
                     )
                 )
             },
-            onValueChange = onValueChange,
             singleLine = true,
             isError = isError,
             keyboardOptions = KeyboardOptions(
