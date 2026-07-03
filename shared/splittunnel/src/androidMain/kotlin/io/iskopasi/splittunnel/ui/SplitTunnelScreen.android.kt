@@ -45,11 +45,11 @@ import io.iskopasi.splittunnel.managers.AppManagerData
 actual fun SplitTunnelScreen(component: SplitTunnelComponent, padding: PaddingValues) {
     val toggleColors = ToggleButtonDefaults.toggleButtonColors(
         containerColor = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.tertiary,
+        contentColor = cWhite,
         disabledContentColor = MaterialTheme.colorScheme.primary,
         disabledContainerColor = cWhite,
         checkedContainerColor = cWhite,
-        checkedContentColor = MaterialTheme.colorScheme.primary
+        checkedContentColor = Color.Black
     )
 
     val appList by component.appList.collectAsStateWithLifecycle()

@@ -48,7 +48,9 @@ import io.iskopasi.kmpvpntest.theme.TablerRouter
 import io.iskopasi.kmpvpntest.theme.dark
 import io.iskopasi.kmpvpntest.theme.light
 import io.iskopasi.kmpvpntest.ui.MainScreen
+import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
+import io.iskopasi.kmpvpntest.utils.theme.silver
 import io.iskopasi.splittunnel.ui.SplitTunnelScreen
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -135,12 +137,12 @@ fun App(root: RootComponent) {
                                     shape = RoundedCornerShape(45.dp)
                                 )
                                 .clip(RoundedCornerShape(45.dp))
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .background(silver)
                         ) {
                             NavigationBarItem(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .background(if (isMainSelected) Color.White else Color.Transparent),
+                                    .background(if (isMainSelected) Color.White else silver),
                                 selected = isMainSelected,
                                 onClick = {
                                     if (backStack.last() != Screen.Main) {
@@ -149,11 +151,11 @@ fun App(root: RootComponent) {
                                     }
                                 },
                                 colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
-                                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                                    selectedIconColor = Color.Black,
+                                    selectedTextColor = Color.Black,
                                     indicatorColor = Color.Transparent,
-                                    unselectedIconColor = cWhite,
-                                    unselectedTextColor = cWhite,
+                                    unselectedIconColor = cGray,
+                                    unselectedTextColor = cGray,
                                     disabledIconColor = MaterialTheme.colorScheme.primary,
                                     disabledTextColor = MaterialTheme.colorScheme.primary,
                                 ),
@@ -169,7 +171,7 @@ fun App(root: RootComponent) {
                             NavigationBarItem(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .background(if (isSplitSelected) Color.White else Color.Transparent),
+                                    .background(if (isSplitSelected) Color.White else silver),
                                 selected = isSplitSelected,
                                 onClick = {
                                     if (backStack.last() != Screen.SplitTunnel) {
@@ -178,11 +180,11 @@ fun App(root: RootComponent) {
                                     }
                                 },
                                 colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
-                                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                                    selectedIconColor = Color.Black,
+                                    selectedTextColor = Color.Black,
                                     indicatorColor = Color.Transparent,
-                                    unselectedIconColor = cWhite,
-                                    unselectedTextColor = cWhite,
+                                    unselectedIconColor = cGray,
+                                    unselectedTextColor = cGray,
                                     disabledIconColor = MaterialTheme.colorScheme.primary,
                                     disabledTextColor = MaterialTheme.colorScheme.primary,
                                 ),

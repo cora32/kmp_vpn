@@ -1,13 +1,5 @@
 package io.iskopasi.kmpvpntest.ui
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,20 +12,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,7 +36,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
@@ -59,37 +50,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.kmpvpntest.decompose.MainComponent
 import io.iskopasi.kmpvpntest.utils.theme.cGray
+import io.iskopasi.kmpvpntest.utils.theme.silver
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding: PaddingValues) {
-    val state by component.state.collectAsStateWithLifecycle()
-
-    val isConnected = state == MainComponent.State.Connected
-
-    // Moon Glow Animations
-    val glowTransition = rememberInfiniteTransition()
-    val pulseScale by glowTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
-    val moonColor by animateColorAsState(
-        targetValue = if (isConnected) Color(0xFFFFF9E3) else MaterialTheme.colorScheme.secondary.copy(
-            alpha = 0.8f
-        ),
-        animationSpec = tween(1000)
-    )
-
-    val glowAlpha by animateFloatAsState(
-        targetValue = if (isConnected) 0.4f else 0f,
-        animationSpec = tween(1500)
-    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -101,62 +66,51 @@ fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding:
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Surface(
-                modifier = Modifier
-                    .size(120.dp)
-                    .drawBehind {
-                        if (glowAlpha > 0f) {
-                            drawCircle(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        Color.White.copy(alpha = glowAlpha),
-                                        Color.Transparent
-                                    ),
-                                    center = center,
-                                    radius = size.width * pulseScale
-                                ),
-                                radius = size.width * pulseScale
-                            )
-                        }
-                    },
-                shape = CircleShape,
-                color = moonColor,
-                shadowElevation = if (isConnected) 24.dp else 8.dp,
-                tonalElevation = 4.dp
-            ) {
-                Button(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = component::onConnect,
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = if (isConnected) Color.Black else Color.White
-                    )
-                ) {
-                    val stateText = when (state) {
-                        MainComponent.State.Idle -> "Idle"
-                        MainComponent.State.Connecting -> "Connecting"
-                        MainComponent.State.Connected -> "Connected"
-                        else -> "Idle"
-                    }
-                    Text(
-                        stateText,
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                }
-            }
-
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            ErrorBlock(component = component)
-
             Spacer(modifier = Modifier.height(16.dp))
 
             ProxyBlock(component = component)
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            PowerButton(component = component)
+        }
+    }
+}
+
+@Composable
+fun PowerButton(modifier: Modifier = Modifier, component: MainComponent) {
+    val state by component.state.collectAsStateWithLifecycle()
+
+    val buttonText = when (state) {
+        MainComponent.State.Idle -> "Connect"
+        MainComponent.State.Connecting -> "Connecting"
+        MainComponent.State.Connected -> "Disconnect"
+        else -> "Off"
+    }
+
+    Surface(
+        modifier = Modifier.width(160.dp).height(80.dp).padding(8.dp),
+        border = BorderStroke(width = 0.5.dp, color = Color.White.copy(alpha = 0.3f)),
+        color = Color(0xFFD7D7D7),
+        contentColor = Color.Black,
+        shape = CircleShape,
+        tonalElevation = 4.dp,
+        shadowElevation = 4.dp,
+        onClick = component::onConnect
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                buttonText,
+                style = TextStyle(
+                    color = cGray,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Light,
+                    textAlign = TextAlign.Center
+                )
+            )
         }
     }
 }
@@ -185,15 +139,17 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
     val isPortError by component.isPortError.collectAsStateWithLifecycle()
     val state by component.state.collectAsStateWithLifecycle()
 
+    val isAuthEnabledState = remember { mutableStateOf(component.isAuthEnabled) }
     val isEnabled = state == MainComponent.State.Idle
 
     Surface(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         border = BorderStroke(width = 0.5.dp, color = Color.White.copy(alpha = 0.3f)),
-        color = Color(0xFFD7D7D7).copy(alpha = 0.9f),
+        color = silver,
         contentColor = Color.Black,
         shape = RoundedCornerShape(16.dp),
-        tonalElevation = 8.dp,
+        tonalElevation = 4.dp,
+        shadowElevation = 4.dp
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -222,13 +178,21 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                     keyboardType = KeyboardType.Number
                 )
             }
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            TextCheckbox(
+                modifier = Modifier.align(Alignment.End),
+                state = isAuthEnabledState,
+                onCheckedChange = {
+                    component.onAuthChanged(it)
+                }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Column {
                 Input(
                     label = "Username",
                     initialValue = component.username,
                     onValueChange = component::onUsernameChanged,
-                    isEnabled = isEnabled,
+                    isEnabled = isEnabled && isAuthEnabledState.value,
                     modifier = Modifier,
                     placeholder = "Leave empty if no auth required"
                 )
@@ -238,13 +202,50 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                     initialValue = component.password,
                     onValueChange = component::onPasswordChanged,
                     modifier = Modifier,
-                    isEnabled = isEnabled,
+                    isEnabled = isEnabled && isAuthEnabledState.value,
                     imeAction = ImeAction.Done,
                     keyboardType = KeyboardType.Password,
                     placeholder = "Leave empty if no auth required"
                 )
             }
         }
+    }
+}
+
+@Composable
+fun TextCheckbox(
+    modifier: Modifier = Modifier,
+    state: MutableState<Boolean>,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            "Enable authorization:",
+            style = TextStyle(
+                color = cGray,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Light
+            )
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Checkbox(
+            checked = state.value,
+            onCheckedChange = {
+                state.value = it
+                onCheckedChange(it)
+            },
+            colors = CheckboxDefaults.colors().copy(
+                checkedCheckmarkColor = Color.Black,
+                uncheckedCheckmarkColor = Color.Black,
+                checkedBoxColor = Color.Transparent,
+                uncheckedBoxColor = Color.Transparent,
+                checkedBorderColor = Color.Black,
+                uncheckedBorderColor = Color.Black,
+            )
+        )
     }
 }
 
@@ -300,6 +301,9 @@ fun Input(
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
                 errorContainerColor = Color.Transparent,
+                errorBorderColor = Color.Red,
+                errorLabelColor = Color.Red,
+                errorTextColor = cGray,
                 focusedTextColor = cGray,
                 unfocusedTextColor = cGray.copy(alpha = 0.7f),
                 disabledTextColor = cGray.copy(alpha = 0.4f),

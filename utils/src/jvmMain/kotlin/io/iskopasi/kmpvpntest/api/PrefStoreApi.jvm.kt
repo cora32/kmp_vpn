@@ -45,6 +45,13 @@ class DesktopPrefStoreApi : PrefStoreApi {
         set(value) {
             prefs.putBoolean("allow_all_apps", value)
         }
+
+    override var isAuthEnabled: Boolean
+        get() = prefs.getBoolean("is_auth_enabled", false)
+        set(value) {
+            prefs.putBoolean("is_auth_enabled", value)
+        }
+
     override var showSystemApps: Boolean = true
 }
 

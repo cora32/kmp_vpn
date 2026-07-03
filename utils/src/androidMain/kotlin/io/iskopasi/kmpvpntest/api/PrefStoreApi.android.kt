@@ -65,6 +65,14 @@ class AndroidPrefStoreApi() : PrefStoreApi {
                 putBoolean("show_system_apps", value)
             }
         }
+
+    override var isAuthEnabled: Boolean
+        get() = sp.getBoolean("is_auth_enabled", false)
+        set(value) {
+            sp.edit(commit = true) {
+                putBoolean("is_auth_enabled", value)
+            }
+        }
 }
 
 actual fun getPrefStore(): PrefStoreApi = AndroidPrefStoreApi()
