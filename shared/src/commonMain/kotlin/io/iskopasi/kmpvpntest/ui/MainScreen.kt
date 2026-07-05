@@ -38,12 +38,10 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,7 +49,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.kmpvpntest.decompose.MainComponent
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.silver
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding: PaddingValues) {
@@ -138,9 +135,19 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
     val isHostError by component.isHostError.collectAsStateWithLifecycle()
     val isPortError by component.isPortError.collectAsStateWithLifecycle()
     val state by component.state.collectAsStateWithLifecycle()
-
+    val refreshSignal by component.refreshSignalFlow.collectAsStateWithLifecycle()
     val isAuthEnabledState = remember { mutableStateOf(component.isAuthEnabled) }
     val isEnabled = state == MainComponent.State.Idle
+    val hostState = remember(refreshSignal) {
+        mutableStateOf(component.host)
+    }
+    val portState = remember(refreshSignal) { mutableStateOf(component.port) }
+    val usernameState = remember(refreshSignal) { mutableStateOf(component.username) }
+    val passwordState = remember(refreshSignal) { mutableStateOf(component.password) }
+
+    LaunchedEffect(component.isAuthEnabled) {
+        isAuthEnabledState.value = component.isAuthEnabled
+    }
 
     Surface(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -161,7 +168,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
             ) {
                 Input(
                     label = "IP (socks5)",
-                    initialValue = component.host,
+                    state = hostState,
                     isError = isHostError,
                     onValueChange = component::onHostChanged,
                     isEnabled = isEnabled,
@@ -170,7 +177,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                 )
                 Input(
                     label = "Port",
-                    initialValue = component.port,
+                    state = portState,
                     isError = isPortError,
                     onValueChange = component::onPortChanged,
                     isEnabled = isEnabled,
@@ -190,7 +197,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
             Column {
                 Input(
                     label = "Username",
-                    initialValue = component.username,
+                    state = usernameState,
                     onValueChange = component::onUsernameChanged,
                     isEnabled = isEnabled && isAuthEnabledState.value,
                     modifier = Modifier,
@@ -199,7 +206,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Input(
                     label = "Password",
-                    initialValue = component.password,
+                    state = passwordState,
                     onValueChange = component::onPasswordChanged,
                     modifier = Modifier,
                     isEnabled = isEnabled && isAuthEnabledState.value,
@@ -253,28 +260,29 @@ fun TextCheckbox(
 fun Input(
     modifier: Modifier = Modifier,
     label: String,
-    initialValue: String,
+    state: MutableState<String>,
     isError: Boolean = false,
     onValueChange: (String) -> Unit,
     isEnabled: Boolean,
     imeAction: ImeAction = ImeAction.Next,
     keyboardType: KeyboardType = KeyboardType.Text,
-    placeholder: String = ""
+    placeholder: String = "",
+    onPaste: ((String) -> Unit)? = null
 ) {
-    var textFieldValue by remember {
-        mutableStateOf(TextFieldValue(initialValue))
-    }
+//    var textFieldValue by remember("") {
+//        mutableStateOf(TextFieldValue(""))
+//    }
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(isFocused) {
-        if (isFocused) {
-            kotlinx.coroutines.delay(10.milliseconds)
-            textFieldValue = textFieldValue.copy(
-                selection = TextRange(0, textFieldValue.text.length)
-            )
-        }
-    }
+//    LaunchedEffect(isFocused) {
+//        if (isFocused) {
+//            delay(20.milliseconds)
+//            textFieldValue = textFieldValue.copy(
+//                selection = TextRange(0, textFieldValue.text.length)
+//            )
+//        }
+//    }
 
     Column(modifier = modifier) {
         Text(
@@ -291,10 +299,16 @@ fun Input(
         Spacer(modifier = Modifier.height(4.dp))
         OutlinedTextField(
             enabled = isEnabled,
-            value = textFieldValue,
+            value = state.value,
             onValueChange = {
-                textFieldValue = it
-                onValueChange(it.text)
+                val isPasted = onPaste != null
+
+                if (isPasted) {
+                    onPaste.invoke(it)
+                } else {
+                    state.value = it
+                    onValueChange(it)
+                }
             },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
@@ -304,6 +318,7 @@ fun Input(
                 errorBorderColor = Color.Red,
                 errorLabelColor = Color.Red,
                 errorTextColor = cGray,
+                errorCursorColor = Color.Red,
                 focusedTextColor = cGray,
                 unfocusedTextColor = cGray.copy(alpha = 0.7f),
                 disabledTextColor = cGray.copy(alpha = 0.4f),

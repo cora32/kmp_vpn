@@ -1,8 +1,8 @@
 package io.iskopasi.kmpvpntest.decompose
 
 import com.arkivanov.decompose.ComponentContext
+import io.iskopasi.kmpvpntest.api.EventBus
 import io.iskopasi.kmpvpntest.api.PermissionsApi
-import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.api.e
 import io.iskopasi.kmpvpntest.managers.ProxyManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
@@ -27,6 +27,7 @@ interface MainComponent {
     var username: String
     var password: String
     val errorMessage: StateFlow<String>
+    val refreshSignalFlow: MutableStateFlow<Boolean>
 
     val isHostError: StateFlow<Boolean>
     val isPortError: StateFlow<Boolean>
@@ -36,7 +37,8 @@ interface MainComponent {
     fun onPortChanged(value: String)
     fun onUsernameChanged(value: String)
     fun onPasswordChanged(value: String)
-    fun onAuthChanged(it: Boolean)
+    fun onAuthChanged(value: Boolean)
+    fun tryParseSocks5(text: String)
 
     enum class State {
         Idle,
@@ -49,10 +51,10 @@ interface MainComponent {
 class MainComponentImpl(
     private val componentContext: ComponentContext,
 ) : MainComponent, ComponentContext by componentContext, KoinComponent {
-    private val prefStorage: PrefStoreApi by inject()
     private val proxyManager: ProxyManager by inject()
     private val permissionApi: PermissionsApi by inject()
     private val signalManager: SignalManager by inject()
+    private val eventBus: EventBus by inject()
     private val _state = MutableStateFlow(MainComponent.State.Idle)
     private val _isHostError = MutableStateFlow(false)
     private val _isPortError = MutableStateFlow(false)
@@ -61,7 +63,7 @@ class MainComponentImpl(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override val state = _state.asStateFlow()
-    override var isAuthEnabled = prefStorage.isAuthEnabled
+    override var isAuthEnabled = proxyManager.isAuthEnabled
     override var host = proxyManager.proxyData.host
     override var port = proxyManager.proxyData.port
     override var username = proxyManager.proxyData.username
@@ -69,6 +71,7 @@ class MainComponentImpl(
     override val errorMessage = _errorMessage.asStateFlow()
     override val isHostError = _isHostError.asStateFlow()
     override val isPortError = _isPortError.asStateFlow()
+    override val refreshSignalFlow = MutableStateFlow(false)
 
     init {
         val errorJob = scope.launch {
@@ -134,7 +137,71 @@ class MainComponentImpl(
     }
 
     override fun onAuthChanged(value: Boolean) {
-        prefStorage.isAuthEnabled = value
+        proxyManager.isAuthEnabled = value
+        isAuthEnabled = value
+    }
+
+    override fun tryParseSocks5(text: String) {
+        "Trying to parse: $text".e
+
+        val trimmed = text.trim()
+        // Regex patterns for the different formats
+        val patterns = listOf(
+            // socks5://username:password@host:port
+            Regex("""^socks5://([^:@]+):([^:@]+)@([^:/]+):(\d+)$"""),
+            // username:password@host:port
+            Regex("""^([^:@]+):([^:@]+)@([^:/]+):(\d+)$"""),
+            // socks5://host:port
+            Regex("""^socks5://([^:/]+):(\d+)$"""),
+            // host:port
+            Regex("""^([^:/]+):(\d+)$""")
+        )
+
+        for ((index, regex) in patterns.withIndex()) {
+            val match = regex.find(trimmed) ?: continue
+            val groups = match.groupValues
+
+            when (index) {
+                0 -> { // socks5://username:password@host:port
+                    onUsernameChanged(groups[1])
+                    onPasswordChanged(groups[2])
+                    onHostChanged(groups[3])
+                    onPortChanged(groups[4])
+                    onAuthChanged(true)
+                }
+
+                1 -> { // username:password@host:port
+                    onUsernameChanged(groups[1])
+                    onPasswordChanged(groups[2])
+                    onHostChanged(groups[3])
+                    onPortChanged(groups[4])
+                    onAuthChanged(true)
+                }
+
+                2 -> { // socks5://host:port
+                    onHostChanged(groups[1])
+                    onPortChanged(groups[2])
+                    onAuthChanged(false)
+                }
+
+                3 -> { // host:port
+                    onHostChanged(groups[1])
+                    onPortChanged(groups[2])
+                    onAuthChanged(false)
+                }
+            }
+
+            refreshSignalFlow.update {
+                true
+            }
+            return // Stop after first successful match
+        }
+
+        // expected ip
+        onHostChanged(text)
+        refreshSignalFlow.update {
+            true
+        }
     }
 
     private fun clearErrors() {
@@ -153,23 +220,29 @@ class MainComponentImpl(
         scope.launch {
             signalManager.reset()
 
-            val isOk = proxyManager.checkConnection()
-            "[MainComponent] Proxy check: $isOk".e
+            try {
+                val isOk = proxyManager.checkConnection()
+                "[MainComponent] Proxy check: $isOk".e
 
-            if (isOk) {
-                proxyManager.startVPN()
+                if (isOk) {
+                    proxyManager.startVPN()
 
-                val isConnected = proxyManager.isConnected()
-                "[MainComponent] isConnected result: $isConnected".e
+                    val isConnected = proxyManager.isConnected()
+                    "[MainComponent] isConnected result: $isConnected".e
 
-                if (isConnected) {
-                    setState(MainComponent.State.Connected)
+                    if (isConnected) {
+                        setState(MainComponent.State.Connected)
+                    } else {
+                        setState(MainComponent.State.Idle)
+                    }
                 } else {
                     setState(MainComponent.State.Idle)
+                    signalManager.onError("Connection error.\nCheck your proxy settings.")
+                    eventBus.sendEvent("Connection error.\nCheck your proxy settings.")
                 }
-            } else {
+            } catch (ex: Exception) {
                 setState(MainComponent.State.Idle)
-                signalManager.onError("Connection error.\nCheck your proxy settings.")
+                eventBus.sendEvent("${ex.message}")
             }
         }
     }

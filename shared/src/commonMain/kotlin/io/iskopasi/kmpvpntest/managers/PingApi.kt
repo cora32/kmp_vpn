@@ -11,6 +11,10 @@ import java.net.Authenticator
 import java.net.InetSocketAddress
 import java.net.PasswordAuthentication
 import java.net.Proxy
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 
 interface PingApi {
     suspend fun connect(proxyData: ProxyData): Boolean
@@ -42,29 +46,29 @@ class PingApiImpl : PingApi {
 
 
                 // Disabling cert checks for testing purposes
-//                val trustAllCerts = object : X509TrustManager {
-//                    override fun checkClientTrusted(
-//                        chain: Array<out X509Certificate>?,
-//                        authType: String?
-//                    ) {
-//                    }
-//
-//                    override fun checkServerTrusted(
-//                        chain: Array<out X509Certificate>?,
-//                        authType: String?
-//                    ) {
-//                    }
-//
-//                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-//                }
-//
-//                val sslContext = SSLContext.getInstance("SSL")
-//                sslContext.init(null, arrayOf(trustAllCerts), SecureRandom())
-//
-//                config {
-//                    sslSocketFactory(sslContext.socketFactory, trustAllCerts)
-//                    hostnameVerifier { _, _ -> true }
-//                }
+                val trustAllCerts = object : X509TrustManager {
+                    override fun checkClientTrusted(
+                        chain: Array<out X509Certificate>?,
+                        authType: String?
+                    ) {
+                    }
+
+                    override fun checkServerTrusted(
+                        chain: Array<out X509Certificate>?,
+                        authType: String?
+                    ) {
+                    }
+
+                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                }
+
+                val sslContext = SSLContext.getInstance("SSL")
+                sslContext.init(null, arrayOf(trustAllCerts), SecureRandom())
+
+                config {
+                    sslSocketFactory(sslContext.socketFactory, trustAllCerts)
+                    hostnameVerifier { _, _ -> true }
+                }
             }
         }
     }
@@ -74,7 +78,7 @@ class PingApiImpl : PingApi {
 
         "[PingApi] Connecting to ${proxyData.host}:${proxyData.port}".e
 
-        return try {
+        client.use { client ->
             val response = client.get(Ipify) {
                 timeout {
                     connectTimeoutMillis = 5000
@@ -85,11 +89,6 @@ class PingApiImpl : PingApi {
             "[PingApi] Response: ${response.bodyAsText()}".e
 
             return true
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            false
-        } finally {
-            client.close()
         }
     }
 

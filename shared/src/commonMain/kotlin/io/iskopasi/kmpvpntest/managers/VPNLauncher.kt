@@ -1,6 +1,6 @@
 package io.iskopasi.kmpvpntest.managers
 
 interface VPNLauncherInterface {
-    fun startVPN()
+    fun startVPN(isAuthEnabled: Boolean)
     fun stopVPN()
 }

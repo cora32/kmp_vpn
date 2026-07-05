@@ -39,7 +39,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
         return file
     }
 
-    override fun startVPN() {
+    override fun startVPN(isAuthEnabled: Boolean) {
         cleanup()
 
         Thread.sleep(1000)

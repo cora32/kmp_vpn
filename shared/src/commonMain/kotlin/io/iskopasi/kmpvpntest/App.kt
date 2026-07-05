@@ -30,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import io.iskopasi.kmpvpntest.api.showToast
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.theme.TablerRouteAltLeft
 import io.iskopasi.kmpvpntest.theme.TablerRouter
@@ -108,6 +110,14 @@ fun AnimatedBackground() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun App(root: RootComponent) {
+    LaunchedEffect(Unit) {
+        root.eventBus.events.collect { event ->
+            if (event.isNotEmpty()) {
+                showToast(event)
+            }
+        }
+    }
+
     MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) dark else light
     ) {

@@ -20,9 +20,9 @@ import io.iskopasi.kmpvpntest.StopCommand
 import io.iskopasi.kmpvpntest.UsernameExtra
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.api.e
-import io.iskopasi.kmpvpntest.managers.ConfigBuilder
 import io.iskopasi.kmpvpntest.managers.NManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
+import io.iskopasi.kmpvpntest.managers.getConfigBuilder
 import io.nekohasekai.libbox.CommandServer
 import io.nekohasekai.libbox.CommandServerHandler
 import io.nekohasekai.libbox.ConnectionOwner
@@ -104,7 +104,7 @@ class VPNServiceImpl : VpnService(),
         password: String?,
         logLevel: String?
     ) {
-        if (host == null || port == null || username == null || password == null) return
+        if (host == null || port == null) return
 
         try {
             vpnInterface?.close()
@@ -114,12 +114,12 @@ class VPNServiceImpl : VpnService(),
 
         serviceScope.apply {
             try {
-                val configData = ConfigBuilder.getSocks5Config(
+                val configData = getConfigBuilder().getConfig(
                     host = host,
                     port = port,
                     username = username,
                     password = password,
-                    logLevel = "debug",
+                    logLevel = logLevel,
                     routeAllAppsIntoVPN = prefStoreApi.routeAllApps,
                     allowedPackages = prefStoreApi.allowedAppsNamesOnly
                 ).e

@@ -1,5 +1,6 @@
 package io.iskopasi.kmpvpntest.di
 
+import io.iskopasi.kmpvpntest.api.EventBus
 import io.iskopasi.kmpvpntest.api.PermissionsApi
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.api.getPermissionApi
@@ -13,6 +14,9 @@ import io.iskopasi.splittunnel.managers.getAppManager
 import org.koin.dsl.module
 
 fun getModules() = module {
+    single<EventBus> {
+        EventBus()
+    }
     factory<ProxyManager> {
         ProxyManager(
             vpnApi = get(),

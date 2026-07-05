@@ -1,7 +1,5 @@
 package io.iskopasi.kmpvpntest.managers
 
-import io.iskopasi.kmpvpntest.api.e
-
 private const val hostPlaceholder = "%HOST%"
 private const val portPlaceholder = "%PORT%"
 private const val usernamePlaceholder = "%USERNAME%"
@@ -11,6 +9,7 @@ private const val allowedPackagesPlaceholder = "%APPS%"
 private const val interfaceNamePlaceholder = "%INTERFACE_NAME%"
 private const val finalOutboundPlaceholder = "%FINAL_OUTBOUND%"
 private const val rulesPlaceholder = "%RULES%"
+
 
 val allowAllAppsAndroid = """
     {
@@ -188,71 +187,16 @@ val allowAllAppsDesktop = """
 }
 """.trimIndent()
 
-class ConfigBuilder {
-    companion object {
-        fun getSocks5Config(
-            host: String,
-            port: String,
-            username: String,
-            password: String,
-            logLevel: String,
-            allowedPackages: Set<String> = emptySet(),
-            routeAllAppsIntoVPN: Boolean
-        ): String {
-            if (routeAllAppsIntoVPN)
-                return allowAllAppsAndroid
-                    .replace(hostPlaceholder, host)
-                    .replace(portPlaceholder, port)
-                    .replace(usernamePlaceholder, username)
-                    .replace(passwordPlaceholder, password)
-                    .replace(logPlaceholder, logLevel)
-            else {
-                val packagesJson = allowedPackages.joinToString("\", \"", "\"", "\"")
-
-                return allowSelectedAppsAndroid
-                    .replace(hostPlaceholder, host)
-                    .replace(portPlaceholder, port)
-                    .replace(usernamePlaceholder, username)
-                    .replace(passwordPlaceholder, password)
-                    .replace(logPlaceholder, logLevel)
-                    .replace(allowedPackagesPlaceholder, packagesJson)
-            }
-        }
-
-        fun getSocks5DesktopConfig(
-            host: String,
-            port: String,
-            username: String,
-            password: String,
-            logLevel: String,
-            interfaceName: String,
-            allowedPackages: Set<String> = emptySet(),
-            isDefaultRouteVPN: Boolean
-        ): String {
-            val (finalOutbound, rules) = if (isDefaultRouteVPN) {
-                "proxy" to ""
-            } else {
-                val packagesJson = allowedPackages.joinToString("\", \"", "\"", "\"")
-                "direct" to """,
-                    {
-                        "process_name": [$packagesJson],
-                        "outbound": "proxy"
-                    }
-                """.trimIndent()
-            }
-
-            "[ConfigBuilder] Default route: $finalOutbound; rules: $rules".e
-            "[ConfigBuilder] allowedPackages: $allowedPackages; routeAllAppsIntoVPN: $isDefaultRouteVPN".e
-
-            return allowAllAppsDesktop
-                .replace(hostPlaceholder, host)
-                .replace(portPlaceholder, port)
-                .replace(usernamePlaceholder, username)
-                .replace(passwordPlaceholder, password)
-                .replace(logPlaceholder, logLevel)
-                .replace(interfaceNamePlaceholder, interfaceName)
-                .replace(finalOutboundPlaceholder, finalOutbound)
-                .replace(rulesPlaceholder, rules)
-        }
-    }
+interface IConfigBuilder {
+    fun getConfig(
+        host: String,
+        port: String,
+        username: String?,
+        password: String?,
+        logLevel: String?,
+        allowedPackages: Set<String> = emptySet(),
+        routeAllAppsIntoVPN: Boolean
+    ): String
 }
+
+expect fun getConfigBuilder(): IConfigBuilder

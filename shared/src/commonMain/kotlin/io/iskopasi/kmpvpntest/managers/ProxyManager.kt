@@ -18,8 +18,15 @@ class ProxyManager(
             prefStorage.proxyData = value
         }
 
+    var isAuthEnabled: Boolean
+        get() = prefStorage.isAuthEnabled
+        set(value) {
+            prefStorage.isAuthEnabled = value
+        }
+
+
     fun startVPN() {
-        vpnApi.startVPN()
+        vpnApi.startVPN(isAuthEnabled = isAuthEnabled)
     }
 
     fun stopVPN() {
