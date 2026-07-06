@@ -45,21 +45,23 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
         Thread.sleep(1000)
 
         val proxyData = prefStore.proxyData
+        val isAuthEnabled = prefStore.isAuthEnabled
         val interfaceName = "KMPVPN_${System.currentTimeMillis()}"
 
         "--> proxyData: $proxyData".e
 
         // 1. Prepare Config
-        val config = ConfigBuilder.getSocks5DesktopConfig(
+        val config = getConfigBuilder().getConfig(
             host = proxyData.host,
             port = proxyData.port,
-            username = proxyData.username,
-            password = proxyData.password,
+            username = if (isAuthEnabled) proxyData.username else null,
+            password = if (isAuthEnabled) proxyData.password else null,
             logLevel = "debug",
             interfaceName = interfaceName,
-            isDefaultRouteVPN = prefStore.routeAllApps,
+            routeAllAppsIntoVPN = prefStore.routeAllApps,
             allowedPackages = prefStore.allowedAppsNamesOnly
         )
+        "--> config: $config".e
         val configFile = File(workDir, "config.json").apply { writeText(config) }
 
         // 2. Extract binaries from resources
