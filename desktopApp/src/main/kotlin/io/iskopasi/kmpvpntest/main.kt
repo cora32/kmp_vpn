@@ -1,13 +1,17 @@
 package io.iskopasi.kmpvpntest
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -20,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -36,6 +42,7 @@ import io.iskopasi.kmpvpntest.theme.MaterialIconsMinimize
 import io.iskopasi.kmpvpntest.theme.VscodeCodiconsClose
 import io.iskopasi.kmpvpntest.theme.dark
 import io.iskopasi.kmpvpntest.theme.light
+import io.iskopasi.kmpvpntest.utils.theme.cDarkGray
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -117,6 +124,11 @@ fun main() = application {
         ),
     )
 
+    val interactionSourceHide = remember { MutableInteractionSource() }
+    val interactionSourceClose = remember { MutableInteractionSource() }
+    val isHideHovered by interactionSourceHide.collectIsHoveredAsState()
+    val isCloseHovered by interactionSourceClose.collectIsHoveredAsState()
+
     MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) dark else light
     ) {
@@ -152,7 +164,7 @@ fun main() = application {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp)
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .background(cDarkGray)
                     ) {
                         Text(
                             text = "KMP VPN",
@@ -161,10 +173,30 @@ fun main() = application {
                         )
 
                         Row(modifier = Modifier.align(Alignment.CenterEnd)) {
-                            IconButton(onClick = { windowState.isMinimized = true }) {
+                            IconButton(
+                                onClick = { windowState.isMinimized = true },
+                                interactionSource = interactionSourceHide,
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(48.dp)
+                                    .background(
+                                        color = if (isHideHovered) Color.Yellow else Color.Transparent,
+                                        shape = RectangleShape
+                                    )
+                            ) {
                                 Icon(imageVector = MaterialIconsMinimize, contentDescription = null)
                             }
-                            IconButton(onClick = ::exitApplication) {
+                            IconButton(
+                                onClick = ::exitApplication,
+                                interactionSource = interactionSourceClose,
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(48.dp)
+                                    .background(
+                                        color = if (isCloseHovered) Color.Red else Color.Transparent,
+                                        shape = RectangleShape
+                                    )
+                            ) {
                                 Icon(imageVector = VscodeCodiconsClose, contentDescription = null)
                             }
                         }
