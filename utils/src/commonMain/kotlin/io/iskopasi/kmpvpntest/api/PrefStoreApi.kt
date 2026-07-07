@@ -10,6 +10,7 @@ interface PrefStoreApi : KoinComponent {
     var routeAllApps: Boolean
     var showSystemApps: Boolean
     var isAuthEnabled: Boolean
+    var isCertCheckEnabled: Boolean
 }
 
 expect fun getPrefStore(): PrefStoreApi

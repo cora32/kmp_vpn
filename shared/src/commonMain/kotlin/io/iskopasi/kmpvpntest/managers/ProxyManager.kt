@@ -61,5 +61,8 @@ class ProxyManager(
         return signalManager.signalBus.first { it != null } == true
     }
 
-    suspend fun checkConnection(): Boolean = pingApi.connect(proxyData = proxyData)
+    suspend fun checkConnection(isCertCheckEnabled: Boolean): Boolean = pingApi.connect(
+        proxyData = proxyData,
+        isCertCheckEnabled = isCertCheckEnabled
+    )
 }

@@ -1,5 +1,6 @@
 package io.iskopasi.kmpvpntest.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.iskopasi.kmpvpntest.api.isAndroid
 import io.iskopasi.kmpvpntest.decompose.MainComponent
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.silver
@@ -136,6 +138,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
     val isPortError by component.isPortError.collectAsStateWithLifecycle()
     val state by component.state.collectAsStateWithLifecycle()
     val refreshSignal by component.refreshSignalFlow.collectAsStateWithLifecycle()
+    val isCertCheckEnabledState = remember { mutableStateOf(component.isCertCheckEnabled) }
     val isAuthEnabledState = remember { mutableStateOf(component.isAuthEnabled) }
     val isEnabled = state == MainComponent.State.Idle
     val hostState = remember(refreshSignal) {
@@ -186,34 +189,50 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
+            if (isAndroid)
+                TextCheckbox(
+                    modifier = Modifier.align(Alignment.End),
+                    state = isCertCheckEnabledState,
+                    text = "Enable certificate check:",
+                    onCheckedChange = {
+                        component.onCertCheckChanged(it)
+                    }
+                )
+            Spacer(modifier = Modifier.height(8.dp))
             TextCheckbox(
                 modifier = Modifier.align(Alignment.End),
                 state = isAuthEnabledState,
+                text = "Enable authorization:",
                 onCheckedChange = {
                     component.onAuthChanged(it)
                 }
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Column {
-                Input(
-                    label = "Username",
-                    state = usernameState,
-                    onValueChange = component::onUsernameChanged,
-                    isEnabled = isEnabled && isAuthEnabledState.value,
-                    modifier = Modifier,
-                    placeholder = "Leave empty if no auth required"
-                )
+            AnimatedVisibility(
+                visible = isAuthEnabledState.value,
+
+                ) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Input(
-                    label = "Password",
-                    state = passwordState,
-                    onValueChange = component::onPasswordChanged,
-                    modifier = Modifier,
-                    isEnabled = isEnabled && isAuthEnabledState.value,
-                    imeAction = ImeAction.Done,
-                    keyboardType = KeyboardType.Password,
-                    placeholder = "Leave empty if no auth required"
-                )
+                Column {
+                    Input(
+                        label = "Username",
+                        state = usernameState,
+                        onValueChange = component::onUsernameChanged,
+                        isEnabled = isEnabled && isAuthEnabledState.value,
+                        modifier = Modifier,
+                        placeholder = "Leave empty if no auth required"
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Input(
+                        label = "Password",
+                        state = passwordState,
+                        onValueChange = component::onPasswordChanged,
+                        modifier = Modifier,
+                        isEnabled = isEnabled && isAuthEnabledState.value,
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Password,
+                        placeholder = "Leave empty if no auth required"
+                    )
+                }
             }
         }
     }
@@ -222,6 +241,7 @@ fun ProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
 @Composable
 fun TextCheckbox(
     modifier: Modifier = Modifier,
+    text: String,
     state: MutableState<Boolean>,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -230,14 +250,13 @@ fun TextCheckbox(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            "Enable authorization:",
+            text,
             style = TextStyle(
                 color = cGray,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Light
             )
         )
-        Spacer(modifier = Modifier.width(8.dp))
         Checkbox(
             checked = state.value,
             onCheckedChange = {

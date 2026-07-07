@@ -52,6 +52,12 @@ class DesktopPrefStoreApi : PrefStoreApi {
             prefs.putBoolean("is_auth_enabled", value)
         }
 
+    override var isCertCheckEnabled: Boolean
+        get() = prefs.getBoolean("is_cert_check_enabled", false)
+        set(value) {
+            prefs.putBoolean("is_cert_check_enabled", value)
+        }
+
     override var showSystemApps: Boolean = true
 }
 

@@ -3,6 +3,7 @@ package io.iskopasi.kmpvpntest.decompose
 import com.arkivanov.decompose.ComponentContext
 import io.iskopasi.kmpvpntest.api.EventBus
 import io.iskopasi.kmpvpntest.api.PermissionsApi
+import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.api.e
 import io.iskopasi.kmpvpntest.managers.ProxyManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
@@ -22,6 +23,7 @@ import org.koin.core.component.inject
 interface MainComponent {
     val state: StateFlow<State>
     var isAuthEnabled: Boolean
+    var isCertCheckEnabled: Boolean
     var host: String
     var port: String
     var username: String
@@ -38,6 +40,7 @@ interface MainComponent {
     fun onUsernameChanged(value: String)
     fun onPasswordChanged(value: String)
     fun onAuthChanged(value: Boolean)
+    fun onCertCheckChanged(value: Boolean)
     fun tryParseSocks5(text: String)
 
     enum class State {
@@ -51,6 +54,7 @@ interface MainComponent {
 class MainComponentImpl(
     private val componentContext: ComponentContext,
 ) : MainComponent, ComponentContext by componentContext, KoinComponent {
+    private val prefStore: PrefStoreApi by inject()
     private val proxyManager: ProxyManager by inject()
     private val permissionApi: PermissionsApi by inject()
     private val signalManager: SignalManager by inject()
@@ -63,7 +67,16 @@ class MainComponentImpl(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override val state = _state.asStateFlow()
-    override var isAuthEnabled = proxyManager.isAuthEnabled
+    override var isAuthEnabled
+        get() = proxyManager.isAuthEnabled
+        set(value) {
+            proxyManager.isAuthEnabled = value
+        }
+    override var isCertCheckEnabled
+        get() = prefStore.isCertCheckEnabled
+        set(value) {
+            prefStore.isCertCheckEnabled = value
+        }
     override var host = proxyManager.proxyData.host
     override var port = proxyManager.proxyData.port
     override var username = proxyManager.proxyData.username
@@ -137,8 +150,11 @@ class MainComponentImpl(
     }
 
     override fun onAuthChanged(value: Boolean) {
-        proxyManager.isAuthEnabled = value
         isAuthEnabled = value
+    }
+
+    override fun onCertCheckChanged(value: Boolean) {
+        isCertCheckEnabled = value
     }
 
     override fun tryParseSocks5(text: String) {
@@ -221,7 +237,7 @@ class MainComponentImpl(
             signalManager.reset()
 
             try {
-                val isOk = proxyManager.checkConnection()
+                val isOk = proxyManager.checkConnection(isCertCheckEnabled = isCertCheckEnabled)
                 "[MainComponent] Proxy check: $isOk".e
 
                 if (isOk) {

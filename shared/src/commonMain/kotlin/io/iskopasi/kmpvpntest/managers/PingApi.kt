@@ -17,11 +17,11 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.X509TrustManager
 
 interface PingApi {
-    suspend fun connect(proxyData: ProxyData): Boolean
+    suspend fun connect(proxyData: ProxyData, isCertCheckEnabled: Boolean): Boolean
 }
 
 class PingApiImpl : PingApi {
-    fun getClient(proxyData: ProxyData): HttpClient {
+    private fun getClient(proxyData: ProxyData, isCertCheckEnabled: Boolean): HttpClient {
         // SOCKS5 authentication on Android/JVM requires a global Authenticator
         if (proxyData.username.isNotEmpty()) {
             Authenticator.setDefault(object : Authenticator() {
@@ -46,35 +46,37 @@ class PingApiImpl : PingApi {
 
 
                 // Disabling cert checks for testing purposes
-                val trustAllCerts = object : X509TrustManager {
-                    override fun checkClientTrusted(
-                        chain: Array<out X509Certificate>?,
-                        authType: String?
-                    ) {
+                if (!isCertCheckEnabled) {
+                    val trustAllCerts = object : X509TrustManager {
+                        override fun checkClientTrusted(
+                            chain: Array<out X509Certificate>?,
+                            authType: String?
+                        ) {
+                        }
+
+                        override fun checkServerTrusted(
+                            chain: Array<out X509Certificate>?,
+                            authType: String?
+                        ) {
+                        }
+
+                        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
                     }
 
-                    override fun checkServerTrusted(
-                        chain: Array<out X509Certificate>?,
-                        authType: String?
-                    ) {
+                    val sslContext = SSLContext.getInstance("SSL")
+                    sslContext.init(null, arrayOf(trustAllCerts), SecureRandom())
+
+                    config {
+                        sslSocketFactory(sslContext.socketFactory, trustAllCerts)
+                        hostnameVerifier { _, _ -> true }
                     }
-
-                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-                }
-
-                val sslContext = SSLContext.getInstance("SSL")
-                sslContext.init(null, arrayOf(trustAllCerts), SecureRandom())
-
-                config {
-                    sslSocketFactory(sslContext.socketFactory, trustAllCerts)
-                    hostnameVerifier { _, _ -> true }
                 }
             }
         }
     }
 
-    override suspend fun connect(proxyData: ProxyData): Boolean {
-        val client = getClient(proxyData)
+    override suspend fun connect(proxyData: ProxyData, isCertCheckEnabled: Boolean): Boolean {
+        val client = getClient(proxyData, isCertCheckEnabled = isCertCheckEnabled)
 
         "[PingApi] Connecting to ${proxyData.host}:${proxyData.port}".e
 

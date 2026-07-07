@@ -73,6 +73,14 @@ class AndroidPrefStoreApi() : PrefStoreApi {
                 putBoolean("is_auth_enabled", value)
             }
         }
+
+    override var isCertCheckEnabled: Boolean
+        get() = sp.getBoolean("is_cert_check_enabled", true)
+        set(value) {
+            sp.edit(commit = true) {
+                putBoolean("is_cert_check_enabled", value)
+            }
+        }
 }
 
 actual fun getPrefStore(): PrefStoreApi = AndroidPrefStoreApi()
