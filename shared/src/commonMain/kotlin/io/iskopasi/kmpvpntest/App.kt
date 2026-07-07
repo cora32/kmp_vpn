@@ -1,10 +1,14 @@
 package io.iskopasi.kmpvpntest
 
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -36,6 +40,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
@@ -100,11 +106,36 @@ fun AnimatedBackground() {
         label = "ColorCycle"
     )
 
+    val lineProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(5000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "LineProgress"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(backgroundColor)
-    )
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val lineHeight = 0.5.dp.toPx()
+            val spacing = 10.dp.toPx()
+            val lineCount = (size.height / spacing).toInt() + 2
+
+            for (i in 0..lineCount) {
+                val y = (i * spacing) + (lineProgress * spacing)
+                drawRect(
+                    color = Color.White.copy(alpha = 0.15f),
+                    topLeft = Offset(0f, y),
+                    size = Size(size.width, lineHeight)
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
