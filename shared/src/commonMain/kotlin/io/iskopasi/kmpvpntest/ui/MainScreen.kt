@@ -288,20 +288,8 @@ fun Input(
     placeholder: String = "",
     onPaste: ((String) -> Unit)? = null
 ) {
-//    var textFieldValue by remember("") {
-//        mutableStateOf(TextFieldValue(""))
-//    }
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-
-//    LaunchedEffect(isFocused) {
-//        if (isFocused) {
-//            delay(20.milliseconds)
-//            textFieldValue = textFieldValue.copy(
-//                selection = TextRange(0, textFieldValue.text.length)
-//            )
-//        }
-//    }
 
     Column(modifier = modifier) {
         Text(

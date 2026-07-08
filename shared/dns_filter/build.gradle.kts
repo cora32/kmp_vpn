@@ -5,13 +5,14 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 kotlin {
     jvm()
 
     androidLibrary {
-        namespace = "io.iskopasi.splittunnel"
+        namespace = "io.iskopasi.dns_filter"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -29,16 +30,13 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
 
-            api(libs.decompose)
-            api(libs.essenty.lifecycle)
-            implementation(libs.decompose.compose)
-
             // Koin
             api("io.insert-koin:koin-core:3.2.0")
 
-            // Coil 3
-            api("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
-            api("io.coil-kt.coil3:coil-network-okhttp:3.0.0-rc01")
+            // Decompose
+            api(libs.decompose)
+            api(libs.essenty.lifecycle)
+            implementation(libs.decompose.compose)
         }
         jvmMain.dependencies {
         }

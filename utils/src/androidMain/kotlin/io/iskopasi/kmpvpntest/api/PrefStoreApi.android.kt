@@ -50,6 +50,14 @@ class AndroidPrefStoreApi() : PrefStoreApi {
             }
         }
 
+    override var filterList: String
+        get() = sp.getString("filter_list", "") ?: ""
+        set(value) {
+            sp.edit(commit = true) {
+                putString("filter_list", value)
+            }
+        }
+
     override var routeAllApps: Boolean
         get() = sp.getBoolean("allow_all_apps", true)
         set(value) {

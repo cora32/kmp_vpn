@@ -44,6 +44,7 @@ kotlin {
         commonMain.dependencies {
             api(projects.utils)
             implementation(projects.shared.splittunnel)
+            implementation(projects.shared.dnsFilter)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             api(libs.compose.material3)
@@ -54,9 +55,9 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
             // Decompose
-            api("com.arkivanov.decompose:decompose:3.5.0")
-            api("com.arkivanov.essenty:lifecycle:2.5.0")
-            implementation("com.arkivanov.decompose:extensions-compose:3.5.0")
+            api(libs.decompose)
+            api(libs.essenty.lifecycle)
+            implementation(libs.decompose.compose)
 
             // Koin
             api("io.insert-koin:koin-core:3.2.0")

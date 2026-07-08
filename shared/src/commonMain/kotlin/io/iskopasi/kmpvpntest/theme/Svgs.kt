@@ -255,3 +255,72 @@ val TablerRouter: ImageVector
     }
 
 private var _TablerRouter: ImageVector? = null
+
+
+val LucideListFilterPlus: ImageVector
+    get() {
+        if (_LucideListFilterPlus != null) return _LucideListFilterPlus!!
+
+        _LucideListFilterPlus = ImageVector.Builder(
+            name = "list-filter-plus",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Transparent),
+                stroke = SolidColor(Color.Black),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(12f, 5f)
+                horizontalLineTo(2f)
+            }
+            path(
+                fill = SolidColor(Color.Transparent),
+                stroke = SolidColor(Color.Black),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(6f, 12f)
+                horizontalLineToRelative(12f)
+            }
+            path(
+                fill = SolidColor(Color.Transparent),
+                stroke = SolidColor(Color.Black),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(9f, 19f)
+                horizontalLineToRelative(6f)
+            }
+            path(
+                fill = SolidColor(Color.Transparent),
+                stroke = SolidColor(Color.Black),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(16f, 5f)
+                horizontalLineToRelative(6f)
+            }
+            path(
+                fill = SolidColor(Color.Transparent),
+                stroke = SolidColor(Color.Black),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(19f, 8f)
+                verticalLineTo(2f)
+            }
+        }.build()
+
+        return _LucideListFilterPlus!!
+    }
+
+private var _LucideListFilterPlus: ImageVector? = null

@@ -14,12 +14,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,14 +43,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import io.iskopasi.dns_filter.ui.DnsFilterScreen
 import io.iskopasi.kmpvpntest.api.showToast
 import io.iskopasi.kmpvpntest.decompose.RootComponent
+import io.iskopasi.kmpvpntest.theme.LucideListFilterPlus
 import io.iskopasi.kmpvpntest.theme.TablerRouteAltLeft
 import io.iskopasi.kmpvpntest.theme.TablerRouter
 import io.iskopasi.kmpvpntest.theme.dark
@@ -71,6 +75,8 @@ sealed interface Screen : NavKey {
     data object Main : Screen
 
     @Serializable
+    data object DnsFilter : Screen
+
     data object SplitTunnel : Screen
 }
 
@@ -154,6 +160,7 @@ fun App(root: RootComponent) {
     ) {
         val backStack = rememberNavBackStack(configuration = navConfig, Screen.Main)
         val isMainSelected by remember(backStack.last()) { mutableStateOf(backStack.last() == Screen.Main) }
+        val isFilterSelected by remember(backStack.last()) { mutableStateOf(backStack.last() == Screen.DnsFilter) }
         val isSplitSelected by remember(backStack.last()) { mutableStateOf(backStack.last() == Screen.SplitTunnel) }
 
         CompositionLocalProvider(LocalContentColor provides Color.White) {
@@ -165,98 +172,110 @@ fun App(root: RootComponent) {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = Color.Transparent,
                     bottomBar = {
-                    NavigationBar(
-                        containerColor = Color.Transparent,
-                    ) {
-                        Spacer(Modifier.weight(1f))
-                        Row(
-                            modifier = Modifier
-                                .padding(bottom = 8.dp).width(220.dp).height(55.dp)
-                                .border(
-                                    width = 0.4.dp,
-                                    color = cWhite.copy(alpha = 0.3f),
-                                    shape = RoundedCornerShape(45.dp)
-                                )
-                                .clip(RoundedCornerShape(45.dp))
-                                .background(silver)
+                        NavigationBar(
+                            containerColor = Color.Transparent,
                         ) {
-                            NavigationBarItem(
+                            Spacer(Modifier.weight(1f))
+                            Row(
                                 modifier = Modifier
-                                    .fillMaxHeight()
-                                    .background(if (isMainSelected) Color.White else silver),
-                                selected = isMainSelected,
-                                onClick = {
-                                    if (backStack.last() != Screen.Main) {
-                                        backStack.clear()
-                                        backStack.add(Screen.Main)
-                                    }
-                                },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = Color.Black,
-                                    selectedTextColor = Color.Black,
-                                    indicatorColor = Color.Transparent,
-                                    unselectedIconColor = cGray,
-                                    unselectedTextColor = cGray,
-                                    disabledIconColor = MaterialTheme.colorScheme.primary,
-                                    disabledTextColor = MaterialTheme.colorScheme.primary,
-                                ),
-                                icon = {
-                                    Icon(
-                                        TablerRouter,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp)
+                                    .padding(bottom = 8.dp).width(270.dp).height(55.dp)
+                                    .border(
+                                        width = 0.4.dp,
+                                        color = cWhite.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(45.dp)
                                     )
-                                },
-                                label = { Text("VPN") }
-                            )
-                            NavigationBarItem(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .background(if (isSplitSelected) Color.White else silver),
-                                selected = isSplitSelected,
-                                onClick = {
-                                    if (backStack.last() != Screen.SplitTunnel) {
-                                        backStack.clear()
-                                        backStack.add(Screen.SplitTunnel)
-                                    }
-                                },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = Color.Black,
-                                    selectedTextColor = Color.Black,
-                                    indicatorColor = Color.Transparent,
-                                    unselectedIconColor = cGray,
-                                    unselectedTextColor = cGray,
-                                    disabledIconColor = MaterialTheme.colorScheme.primary,
-                                    disabledTextColor = MaterialTheme.colorScheme.primary,
-                                ),
-                                icon = { Icon(TablerRouteAltLeft, contentDescription = null) },
-                                label = { Text("Split Tunnel") }
-                            )
+                                    .clip(RoundedCornerShape(45.dp))
+                                    .background(silver)
+                            ) {
+                                NavItem(
+                                    key = Screen.Main,
+                                    isSelected = isMainSelected,
+                                    text = "Main",
+                                    backStack = backStack,
+                                    imageVector = TablerRouter
+                                )
+                                NavItem(
+                                    key = Screen.DnsFilter,
+                                    isSelected = isFilterSelected,
+                                    text = "Filtering",
+                                    backStack = backStack,
+                                    imageVector = LucideListFilterPlus
+                                )
+                                NavItem(
+                                    key = Screen.SplitTunnel,
+                                    isSelected = isSplitSelected,
+                                    text = "Split Tunnel",
+                                    backStack = backStack,
+                                    imageVector = TablerRouteAltLeft
+                                )
+                            }
+                            Spacer(Modifier.weight(1f))
                         }
-                        Spacer(Modifier.weight(1f))
                     }
-                }
-            ) { padding ->
-                NavDisplay(backStack = backStack) { key ->
-                    when (key) {
-                        is Screen.Main -> NavEntry(key) {
-                            MainScreen(
-                                component = root.main,
-                                padding = padding
-                            )
-                        }
+                ) { padding ->
+                    NavDisplay(backStack = backStack) { key ->
+                        when (key) {
+                            is Screen.Main -> NavEntry(key) {
+                                MainScreen(
+                                    component = root.main,
+                                    padding = padding
+                                )
+                            }
 
-                        is Screen.SplitTunnel -> NavEntry(key) {
-                            SplitTunnelScreen(
-                                component = root.splitTunnel,
-                                padding = padding
-                            )
+                            is Screen.DnsFilter -> NavEntry(key) {
+                                DnsFilterScreen(
+                                    component = root.dnsFilterComponent,
+                                    padding = padding
+                                )
+                            }
+
+                            is Screen.SplitTunnel -> NavEntry(key) {
+                                SplitTunnelScreen(
+                                    component = root.splitTunnel,
+                                    padding = padding
+                                )
+                            }
+
+                            else -> error("Unknown screen: $key")
                         }
-                        else -> error("Unknown screen: $key")
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+
+fun RowScope.NavItem(
+    modifier: Modifier = Modifier,
+    isSelected: Boolean,
+    key: Screen,
+    text: String,
+    imageVector: ImageVector,
+    backStack: NavBackStack<NavKey>
+) {
+    NavigationBarItem(
+        modifier = Modifier
+            .fillMaxHeight()
+            .background(if (isSelected) Color.White else silver),
+        selected = isSelected,
+        onClick = {
+            if (backStack.last() != key) {
+                backStack.clear()
+                backStack.add(key)
+            }
+        },
+        colors = NavigationBarItemDefaults.colors(
+            selectedIconColor = Color.Black,
+            selectedTextColor = Color.Black,
+            indicatorColor = Color.Transparent,
+            unselectedIconColor = cGray,
+            unselectedTextColor = cGray,
+            disabledIconColor = MaterialTheme.colorScheme.primary,
+            disabledTextColor = MaterialTheme.colorScheme.primary,
+        ),
+        icon = { Icon(imageVector, contentDescription = null) },
+        label = { Text(text) }
+    )
 }

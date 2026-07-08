@@ -40,6 +40,12 @@ class DesktopPrefStoreApi : PrefStoreApi {
             prefs.put("allowed_apps_names_names", value.joinToString(","))
         }
 
+    override var filterList: String
+        get() = prefs.get("filter_list", "")
+        set(value) {
+            prefs.put("filter_list", value)
+        }
+
     override var routeAllApps: Boolean
         get() = prefs.getBoolean("allow_all_apps", true)
         set(value) {
