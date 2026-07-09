@@ -2,6 +2,11 @@ package io.iskopasi.kmpvpntest.managers
 
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.api.e
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
@@ -12,6 +17,7 @@ const val SingboxExe = "sing-box.exe"
 const val WintunDll = "wintun.dll"
 
 class VPNLauncher : VPNLauncherInterface, KoinComponent {
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val prefStore: PrefStoreApi by inject()
     private val signalManager: SignalManager by inject()
     private val workDir = File(System.getProperty("user.home"), ".kmpvpn").apply { mkdirs() }
@@ -40,71 +46,73 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
     }
 
     override fun startVPN(isAuthEnabled: Boolean) {
-        cleanup()
+        scope.launch {
+            cleanup()
 
-        Thread.sleep(1000)
+            delay(1000)
 
-        val proxyData = prefStore.proxyData
-        val isAuthEnabled = prefStore.isAuthEnabled
-        val interfaceName = "KMPVPN_${System.currentTimeMillis()}"
+            val proxyData = prefStore.proxyData
+            val isAuthEnabled = prefStore.isAuthEnabled
+            val interfaceName = "KMPVPN_${System.currentTimeMillis()}"
 
-        "--> proxyData: $proxyData".e
+            "--> proxyData: $proxyData".e
 
-        // 1. Prepare Config
-        val config = getConfigBuilder().getConfig(
-            host = proxyData.host,
-            port = proxyData.port,
-            username = if (isAuthEnabled) proxyData.username else null,
-            password = if (isAuthEnabled) proxyData.password else null,
-            logLevel = "debug",
-            interfaceName = interfaceName,
-            routeAllAppsIntoVPN = prefStore.routeAllApps,
-            allowedPackages = prefStore.allowedAppsNamesOnly
-        )
-        "--> config: $config".e
-        val configFile = File(workDir, "config.json").apply { writeText(config) }
+            // 1. Prepare Config
+            val config = getConfigBuilder().getConfig(
+                host = proxyData.host,
+                port = proxyData.port,
+                username = if (isAuthEnabled) proxyData.username else null,
+                password = if (isAuthEnabled) proxyData.password else null,
+                logLevel = "debug",
+                interfaceName = interfaceName,
+                routeAllAppsIntoVPN = prefStore.routeAllApps,
+                allowedPackages = prefStore.allowedAppsNamesOnly
+            )
+            "--> config: $config".e
+            val configFile = File(workDir, "config.json").apply { writeText(config) }
 
-        // 2. Extract binaries from resources
-        val exeFile = extractResource(resourceName = SingboxExe)
-        extractResource(resourceName = WintunDll)
+            // 2. Extract binaries from resources
+            val exeFile = extractResource(resourceName = SingboxExe)
+            extractResource(resourceName = WintunDll)
 
-        // 3. Launch
-        // We launch sing-box directly because the app itself is already running with admin privileges.
-        // This allows us to capture stdout/stderr which 'Start-Process' would detach.
-        val pb = ProcessBuilder(
-            exeFile.absolutePath,
-            "run",
-            "-c",
-            configFile.absolutePath
-        )
-        pb.directory(workDir)
-        pb.redirectErrorStream(true)
-        vpnProcess = pb.start()
+            // 3. Launch
+            // We launch sing-box directly because the app itself is already running with admin privileges.
+            // This allows us to capture stdout/stderr which 'Start-Process' would detach.
+            val pb = ProcessBuilder(
+                exeFile.absolutePath,
+                "run",
+                "-c",
+                configFile.absolutePath
+            )
+            pb.directory(workDir)
+            pb.redirectErrorStream(true)
+            vpnProcess = pb.start()
 
-        signalManager.onConnected()
+            signalManager.onConnected()
 
-        val logFile = File(workDir, "logs.txt")
-        debugStreamHandler = Thread {
-            try {
-                vpnProcess?.inputStream?.bufferedReader()?.use { reader ->
-                    logFile.bufferedWriter().use { writer ->
-                        while (!Thread.currentThread().isInterrupted) {
-                            val line = reader.readLine() ?: break
-                            val logLine = "[SINGBOX] $line"
-                            println(logLine)
-                            writer.write(logLine)
-                            writer.newLine()
-                            writer.flush()
+            val logFile = File(workDir, "logs.txt")
+            debugStreamHandler = Thread {
+                try {
+                    vpnProcess?.inputStream?.bufferedReader()?.use { reader ->
+                        logFile.bufferedWriter().use { writer ->
+                            while (!Thread.currentThread().isInterrupted) {
+                                val line = reader.readLine() ?: break
+                                val logLine = "[SINGBOX] $line"
+                                println(logLine)
+                                writer.write(logLine)
+                                writer.newLine()
+                                writer.flush()
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    // Likely the stream was closed because the process was killed
+                    println("[VPNLauncher] Log reader stopped: ${e.message}")
                 }
-            } catch (e: Exception) {
-                // Likely the stream was closed because the process was killed
-                println("[VPNLauncher] Log reader stopped: ${e.message}")
+            }.apply {
+                isDaemon = true
+                start()
             }
-        }.apply {
-            isDaemon = true
-            start()
         }
     }
 
@@ -129,7 +137,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
 
             // 3. Nuclear Cleanup: Use PowerShell to remove all KMPVPN adapters
             val psCommand =
-                "Get-NetAdapter -Name 'KMPVPN_*' -ErrorAction SilentlyContinue | Remove-NetAdapter -Confirm:\$false"
+                $$"Get-NetAdapter -Name 'KMPVPN_*' -ErrorAction SilentlyContinue | Remove-NetAdapter -Confirm:$false"
             ProcessBuilder("powershell", "-Command", psCommand).start().waitFor()
         } catch (ex: Exception) {
             println("[VPNLauncher] Cleanup error: ${ex.message}")
