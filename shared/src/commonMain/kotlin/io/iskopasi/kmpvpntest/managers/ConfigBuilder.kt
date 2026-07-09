@@ -244,9 +244,10 @@ interface IConfigBuilder {
                 getHijackDnsBlock() // Hijack first
             ).apply {
                 // Sniffing and blocking after
-                if (filterList?.isEmpty() == false)
+                if (filterList?.isEmpty() == false) {
                     add(getSniffingBlock())
-                add(getDnsFilterBlock(filterList = filterList))
+                    add(getDnsFilterBlock(filterList = filterList))
+                }
 
                 // And then split routing
                 if (!routeAllApps && appList?.isEmpty() == false)
