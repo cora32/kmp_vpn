@@ -122,6 +122,7 @@ class VPNServiceImpl : VpnService(),
                     logLevel = logLevel,
                     allowedPackages = prefStoreApi.allowedAppsNamesOnly,
                     routeAllAppsIntoVPN = prefStoreApi.routeAllApps,
+                    filterList = prefStoreApi.filterList
                 ).e
 
                 // Configure control server

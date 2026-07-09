@@ -35,7 +35,10 @@ class DnsFilterComponent(
 
     fun addDomain(domain: String) {
         scope.launch {
-            prefStore.filterList += domain
+            val trimmed = Regex("^(?:https?://)?([^/]+).*$")
+                .find(domain.trim())?.groupValues?.get(1) ?: domain.trim()
+
+            prefStore.filterList += trimmed
             fetchDomainList()
         }
     }

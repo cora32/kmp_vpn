@@ -1,8 +1,10 @@
 package io.iskopasi.dns_filter.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -48,12 +50,50 @@ import io.iskopasi.kmpvpntest.utils.theme.cWhite
 
 @Composable
 fun DnsFilterScreen(
-    modifier: Modifier = Modifier,
-    component: DnsFilterComponent,
-    padding: PaddingValues
+    modifier: Modifier = Modifier, component: DnsFilterComponent, padding: PaddingValues
 ) {
     val items by component.filterListFlow.collectAsStateWithLifecycle()
 
+    Column(
+        modifier = Modifier.padding(top = padding.calculateTopPadding() + 32.dp)
+            .padding(bottom = padding.calculateBottomPadding() + 16.dp).padding(horizontal = 16.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(
+                color = Color.Black.copy(alpha = 0.7f),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+            ).weight(1f), contentAlignment = Alignment.Center
+        ) {
+            AnimatedContent(
+                modifier = Modifier.fillMaxSize(),
+                targetState = items,
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    it.isEmpty() -> Box(
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Nothing is blocked yet", style = TextStyle(
+                                color = cWhite.copy(alpha = 0.5f), fontSize = 13.sp
+
+                            ), fontWeight = FontWeight.Light
+                        )
+                    }
+
+                    else -> ListBox(items = it, onDeleteDomain = component::onDeleteDomain)
+                }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        InputField(
+            onEnter = component::addDomain
+        )
+    }
+}
+
+@Composable
+fun ListBox(modifier: Modifier = Modifier, items: Set<String>, onDeleteDomain: (String) -> Unit) {
     val style = remember {
         TextStyle(
             color = cWhite,
@@ -66,44 +106,25 @@ fun DnsFilterScreen(
         Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 8.dp)
     }
 
-    Column(
-        modifier = Modifier
-            .padding(top = padding.calculateTopPadding() + 32.dp)
-            .padding(bottom = padding.calculateBottomPadding() + 16.dp)
-            .padding(horizontal = 16.dp)
+    LazyColumn(
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-                .background(
-                    color = Color.Black.copy(alpha = 0.7f),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-                )
-                .weight(1f)
-        ) {
-            items(items = items.toList(), key = { domain -> domain }) { domain ->
-                DomainItem(
-                    modifier = itemMod.animateItem(),
-                    item = domain,
-                    onDelete = component::onDeleteDomain,
-                    style = style
-                )
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = cWhite
-                )
-            }
+        items(items = items.toList(), key = { domain -> domain }) { domain ->
+            DomainItem(
+                modifier = itemMod.animateItem(),
+                item = domain,
+                onDelete = onDeleteDomain,
+                style = style
+            )
+            HorizontalDivider(
+                thickness = 0.5.dp, color = cWhite
+            )
         }
-        Spacer(Modifier.height(8.dp))
-        InputField(
-            onEnter = component::addDomain
-        )
     }
 }
 
 @Composable
 fun DomainItem(
-    modifier: Modifier = Modifier, item: String, style: TextStyle,
-    onDelete: (String) -> Unit
+    modifier: Modifier = Modifier, item: String, style: TextStyle, onDelete: (String) -> Unit
 ) {
     Row(
         modifier = modifier,
@@ -140,15 +161,12 @@ fun InputField(modifier: Modifier = Modifier, onEnter: (String) -> Unit) {
         shadowElevation = 4.dp,
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedTextField(
-                value = state,
-                onValueChange = {
+                value = state, onValueChange = {
                     state = it
-                },
-                colors = OutlinedTextFieldDefaults.colors(
+                }, colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     disabledContainerColor = Color.Transparent,
@@ -167,13 +185,9 @@ fun InputField(modifier: Modifier = Modifier, onEnter: (String) -> Unit) {
                     unfocusedLabelColor = cGray.copy(alpha = 0.7f),
                     disabledLabelColor = cGray.copy(alpha = 0.4f),
                     cursorColor = Color.Black,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged {
-                        isFocused = it.isFocused
-                    }.weight(1f),
-                placeholder = {
+                ), modifier = Modifier.fillMaxWidth().onFocusChanged {
+                    isFocused = it.isFocused
+                }.weight(1f), placeholder = {
                     Text(
                         text = "Enter domain", style = TextStyle(
                             color = cGray.copy(alpha = 0.4f),
@@ -182,21 +196,14 @@ fun InputField(modifier: Modifier = Modifier, onEnter: (String) -> Unit) {
                             fontWeight = FontWeight.ExtraLight
                         )
                     )
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Done,
-                    keyboardType = KeyboardType.Uri
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = {
-                        focusManager.moveFocus(FocusDirection.Next)
-                    },
-                    onDone = {
-                        onSave()
-                        focusManager.clearFocus()
-                    }
-                )
+                }, singleLine = true, keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done, keyboardType = KeyboardType.Uri
+                ), keyboardActions = KeyboardActions(onNext = {
+                    focusManager.moveFocus(FocusDirection.Next)
+                }, onDone = {
+                    onSave()
+                    focusManager.clearFocus()
+                })
             )
             IconButton(onClick = ::onSave) {
                 Icon(VscodeCodiconsAdd, contentDescription = null)

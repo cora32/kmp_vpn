@@ -2,6 +2,7 @@
 
 package io.iskopasi.splittunnel.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -95,38 +97,63 @@ fun ColumnScope.AllowedApps(
             .weight(1f)
     ) {
         Column(
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Apps routed into the VPN",
+                "Route these apps to the VPN",
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             )
-            if (allowedApps.isEmpty())
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        "If no app is selected - every app is selected.",
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Light
-                        ),
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().padding(top = 30.dp, start = 16.dp, end = 16.dp)
+            AnimatedContent(
+                modifier = Modifier.fillMaxSize(),
+                targetState = allowedApps,
+                contentAlignment = Alignment.Center
             ) {
-                items(allowedApps, key = { it.packageName }) { processName ->
-                    RunningProcessItemWithRemoveButton(
-                        data = processName,
+                when {
+                    it.isEmpty() -> Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Routing everything into the VPN",
+                            style = TextStyle(
+                                color = cWhite.copy(alpha = 0.5f),
+                                fontSize = 13.sp
+                            ),
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Light
+                        )
+                    }
+
+                    else -> RoutedAppsList(
+                        items = it,
                         onRemove = onRemove,
-                        modifier = Modifier.animateItem()
                     )
-                    HorizontalDivider()
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun RoutedAppsList(
+    modifier: Modifier = Modifier,
+    items: List<AppManagerData>,
+    onRemove: (AppManagerData) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth().padding(top = 30.dp, start = 16.dp, end = 16.dp)
+    ) {
+        items(items, key = { it.packageName }) { processName ->
+            RunningProcessItemWithRemoveButton(
+                data = processName,
+                onRemove = onRemove,
+                modifier = Modifier.animateItem()
+            )
+            HorizontalDivider()
         }
     }
 }
@@ -156,18 +183,31 @@ fun ColumnScope.RunningProcessesBox(
                     fontWeight = FontWeight.SemiBold
                 )
             )
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().padding(top = 30.dp, start = 16.dp, end = 16.dp)
+            AnimatedContent(
+                modifier = Modifier.fillMaxSize()
+                    .weight(1f),
+                targetState = runningProcesses,
+                contentAlignment = Alignment.Center
             ) {
-                items(runningProcesses, key = { it.packageName }) { processName ->
-                    RunningProcessItemName(
-                        data = processName,
-                        onTap = onAddApp,
-                        modifier = Modifier.animateItem()
+                when {
+                    it.isEmpty() -> Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Loading process list...",
+                            style = TextStyle(
+                                color = cWhite.copy(alpha = 0.5f),
+                                fontSize = 13.sp
+
+                            ),
+                            fontWeight = FontWeight.Light
                     )
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = cWhite
+                    }
+
+                    else -> RunningProcList(
+                        items = it,
+                        onAddApp = onAddApp,
                     )
                 }
             }
@@ -202,6 +242,29 @@ fun ColumnScope.RunningProcessesBox(
                     contentDescription = "Refresh"
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun RunningProcList(
+    modifier: Modifier = Modifier,
+    items: List<AppManagerData>,
+    onAddApp: (AppManagerData) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth().padding(top = 30.dp, start = 16.dp, end = 16.dp)
+    ) {
+        items(items, key = { it.packageName }) { processName ->
+            RunningProcessItemName(
+                data = processName,
+                onTap = onAddApp,
+                modifier = Modifier.animateItem()
+            )
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = cWhite
+            )
         }
     }
 }
