@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.dns_filter.decompose.DnsFilterComponent
-import io.iskopasi.dns_filter.decompose.FilterData
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
 
@@ -81,7 +80,7 @@ fun DnsFilterScreen(
                 )
                 .weight(1f)
         ) {
-            items(items = items, key = { it.domain }) {
+            items(items = items.toList(), key = { it }) {
                 DomainItem(
                     modifier = itemMod.animateItem(),
                     item = it,
@@ -100,8 +99,8 @@ fun DnsFilterScreen(
 
 @Composable
 fun DomainItem(
-    modifier: Modifier = Modifier, item: FilterData, style: TextStyle,
-    onDelete: (FilterData) -> Unit
+    modifier: Modifier = Modifier, item: String, style: TextStyle,
+    onDelete: (String) -> Unit
 ) {
     Row(
         modifier = modifier,
@@ -109,7 +108,7 @@ fun DomainItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = item.domain, style = style
+            text = item, style = style
         )
         IconButton(onClick = { onDelete(item) }) {
             Icon(LucideCircleMinus, contentDescription = null)

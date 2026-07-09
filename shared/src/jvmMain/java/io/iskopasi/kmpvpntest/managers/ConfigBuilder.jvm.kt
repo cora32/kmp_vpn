@@ -37,71 +37,64 @@ internal class DesktopConfigBuilder : IConfigBuilder {
             )
         }
 
-        override fun getOutboundItem() =
-            mapOf(
-                "type" to "direct",
-                "tag" to "direct"
-            )
+//        override fun getOutboundItem() =
+//            mapOf(
+//                "type" to "direct",
+//                "tag" to "direct"
+//            )
+//
+//        override fun getOutboundBlock(
+//            host: String,
+//            port: Int,
+//            username: String?,
+//            password: String?,
+//            hasFilterBlock: Boolean
+//        ): List<Map<String, Any>> =
+//            listOf(
+//                if (username != null && password != null)
+//                    getSocks5WithAuthBlock(
+//                        host = host,
+//                        port = port,
+//                        username = username,
+//                        password = password,
+//                    )
+//                else
+//                    getSocks5Block(
+//                        host = host,
+//                        port = port,
+//                    ),
+//
+//                getOutboundItem(),
+//            )
 
-        override fun getOutboundBlock(
-            host: String,
-            port: Int,
-            username: String?,
-            password: String?
-        ): List<Map<String, Any>> =
-            listOf(
-                if (username != null && password != null)
-                    getSocks5WithAuthBlock(
-                        host = host,
-                        port = port,
-                        username = username,
-                        password = password,
-                    )
-                else
-                    getSocks5Block(
-                        host = host,
-                        port = port,
-                    ),
 
-                getOutboundItem(),
-            )
+//        override fun getAppListBlock(appList: Set<String>?, outbound: String): Map<String, Any> {
+//            return mapOf(
+//                "process_name" to (appList?.toList() ?: emptyList<String>()),
+//                "outbound" to outbound
+//            )
+//        }
 
-        override fun getRouteBlockInner(
-            finalRoute: String,
-            vararg rules: Map<String, Any>
-        ):
-                Map<String, Any> {
-            return mapOf(
-                "auto_detect_interface" to true,
-                "rules" to rules.toList(),
-                "final" to finalRoute
-            )
-        }
-
-        override fun getAppListBlock(appList: Set<String>?, outbound: String): Map<String, Any> {
-            return mapOf(
-                "process_name" to (appList?.toList() ?: emptyList<String>()),
-                "outbound" to outbound
-            )
-        }
-
-        override fun getRouteBlock(
-            routeAllApps: Boolean,
-            appList: Set<String>?
-        ): Map<String, Any> {
-            return if (routeAllApps) {
-                getRouteBlockInner(
-                    finalRoute = Routes.Proxy.name.lowercase(),
-                    getHijackDnsBlock()
-                )
-            } else {
-                getRouteBlockInner(
-                    finalRoute = Routes.Direct.name.lowercase(),
-                    getAppListBlock(appList = appList, outbound = Routes.Proxy.name.lowercase()),
-                    getHijackDnsBlock()
-                )
-            }
-        }
+//        override fun getRouteBlock(
+//            routeAllApps: Boolean,
+//            appList: Set<String>?,
+//            filterList: Set<String>?
+//        ): Map<String, Any> {
+//            val rules = mutableListOf<Map<String, Any>>().apply {
+//                when {
+//                    !routeAllApps && appList?.isEmpty() == false -> add(getAppListBlock(appList = appList, outbound = Routes.Proxy.name.lowercase()))
+//                    filterList?.isEmpty() == false -> add(getDnsFilterBlock(filterList = filterList))
+//                }
+//
+//                add(getHijackDnsBlock())
+//            }
+//
+//            return getRouteBlockInner(
+//                finalRoute = Routes.Direct.name.lowercase(),
+//                rules,
+//                autoDetectInterface = true
+//            )
+//        }
 
         override fun build(): String {
             when {
@@ -123,13 +116,16 @@ internal class DesktopConfigBuilder : IConfigBuilder {
                         port = port!!,
                         username = username,
                         password = password,
+                        hasFilterBlock = filterList != null
                     ).toJsonElement()
                 )
 
                 put(
                     "route", getRouteBlock(
                         routeAllApps = routeAllApps,
-                        appList = appList
+                        appList = appList,
+                        filterList = filterList,
+                        usePackageNames = false
                     ).toJsonElement()
                 )
             }
@@ -146,7 +142,8 @@ internal class DesktopConfigBuilder : IConfigBuilder {
         logLevel: String?,
         interfaceName: String,
         allowedPackages: Set<String>,
-        routeAllAppsIntoVPN: Boolean
+        routeAllAppsIntoVPN: Boolean,
+        filterList: Set<String>
     ): String {
         return Builder()
             .setLog(logLevel)
@@ -158,6 +155,7 @@ internal class DesktopConfigBuilder : IConfigBuilder {
             .setInterface(interfaceName)
             .setRouteAllApps(routeAllAppsIntoVPN)
             .setAppList(allowedPackages)
+            .setFilterList(filterList)
             .build()
     }
 }

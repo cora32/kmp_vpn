@@ -10,7 +10,8 @@ internal class ConfigBuilder : IConfigBuilder {
         logLevel: String?,
         interfaceName: String,
         allowedPackages: Set<String>,
-        routeAllAppsIntoVPN: Boolean
+        routeAllAppsIntoVPN: Boolean,
+        filterList: Set<String>
     ): String {
         return IConfigBuilder.Builder()
             .setLog(logLevel)
@@ -21,46 +22,8 @@ internal class ConfigBuilder : IConfigBuilder {
             .setInterface(interfaceName)
             .setRouteAllApps(routeAllAppsIntoVPN)
             .setAppList(allowedPackages)
+            .setFilterList(filterList)
             .build()
-    }
-
-    companion object {
-
-//        fun getSocks5DesktopConfig(
-//            host: String,
-//            port: String,
-//            username: String,
-//            password: String,
-//            logLevel: String,
-//            interfaceName: String,
-//            allowedPackages: Set<String> = emptySet(),
-//            isDefaultRouteVPN: Boolean
-//        ): String {
-//            val (finalOutbound, rules) = if (isDefaultRouteVPN) {
-//                "proxy" to ""
-//            } else {
-//                val packagesJson = allowedPackages.joinToString("\", \"", "\"", "\"")
-//                "direct" to """,
-//                    {
-//                        "process_name": [$packagesJson],
-//                        "outbound": "proxy"
-//                    }
-//                """.trimIndent()
-//            }
-//
-//            "[ConfigBuilder] Default route: $finalOutbound; rules: $rules".e
-//            "[ConfigBuilder] allowedPackages: $allowedPackages; routeAllAppsIntoVPN: $isDefaultRouteVPN".e
-//
-//            return allowAllAppsDesktop
-//                .replace(hostPlaceholder, host)
-//                .replace(portPlaceholder, port)
-//                .replace(usernamePlaceholder, username)
-//                .replace(passwordPlaceholder, password)
-//                .replace(logPlaceholder, logLevel)
-//                .replace(interfaceNamePlaceholder, interfaceName)
-//                .replace(finalOutboundPlaceholder, finalOutbound)
-//                .replace(rulesPlaceholder, rules)
-//        }
     }
 }
 

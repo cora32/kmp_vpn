@@ -10,22 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-@Serializable
-data class FilterData(
-    val domain: String,
-)
-
-val String.toFilterList: List<FilterData>
-    get() = if (this.isEmpty()) emptyList() else Json.decodeFromString(this)
-
-val List<FilterData>.toJson: String
-    get() = Json.encodeToString(this)
 
 class DnsFilterComponent(
     context: ComponentContext
@@ -33,8 +20,8 @@ class DnsFilterComponent(
     private val prefStore: PrefStoreApi by inject()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val _filterListFlow = MutableStateFlow<List<FilterData>>(emptyList())
-    val filterListFlow: StateFlow<List<FilterData>> = _filterListFlow.asStateFlow()
+    private val _filterListFlow = MutableStateFlow<Set<String>>(emptySet())
+    val filterListFlow: StateFlow<Set<String>> = _filterListFlow.asStateFlow()
 
     init {
         scope.launch {
@@ -43,21 +30,19 @@ class DnsFilterComponent(
     }
 
     private fun fetchDomainList() {
-        _filterListFlow.update { prefStore.filterList.toFilterList }
+        _filterListFlow.update { prefStore.filterList }
     }
 
     fun addDomain(domain: String) {
         scope.launch {
-            val newList = prefStore.filterList.toFilterList + FilterData(domain)
-            prefStore.filterList = newList.toJson
+            prefStore.filterList += domain
             fetchDomainList()
         }
     }
 
-    fun onDeleteDomain(filterData: FilterData) {
+    fun onDeleteDomain(domain: String) {
         scope.launch {
-            val newList = prefStore.filterList.toFilterList - filterData
-            prefStore.filterList = newList.toJson
+            prefStore.filterList -= domain
             fetchDomainList()
         }
     }

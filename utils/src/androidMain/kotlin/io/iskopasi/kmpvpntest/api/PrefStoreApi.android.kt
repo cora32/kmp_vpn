@@ -50,11 +50,11 @@ class AndroidPrefStoreApi() : PrefStoreApi {
             }
         }
 
-    override var filterList: String
-        get() = sp.getString("filter_list", "") ?: ""
+    override var filterList: Set<String>
+        get() = sp.getStringSet("filter_list", emptySet()) ?: emptySet()
         set(value) {
             sp.edit(commit = true) {
-                putString("filter_list", value)
+                putStringSet("filter_list", value)
             }
         }
 
