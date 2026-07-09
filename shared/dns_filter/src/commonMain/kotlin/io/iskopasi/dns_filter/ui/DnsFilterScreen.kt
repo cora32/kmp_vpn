@@ -80,14 +80,17 @@ fun DnsFilterScreen(
                 )
                 .weight(1f)
         ) {
-            items(items = items.toList(), key = { it }) {
+            items(items = items.toList(), key = { domain -> domain }) { domain ->
                 DomainItem(
                     modifier = itemMod.animateItem(),
-                    item = it,
+                    item = domain,
                     onDelete = component::onDeleteDomain,
                     style = style
                 )
-                HorizontalDivider()
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = cWhite
+                )
             }
         }
         Spacer(Modifier.height(8.dp))

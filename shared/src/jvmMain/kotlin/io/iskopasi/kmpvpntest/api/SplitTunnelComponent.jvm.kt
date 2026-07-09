@@ -9,6 +9,7 @@ import io.iskopasi.splittunnel.pickExeFile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import java.io.File
 
 class SplitTunnelComponentDesktop(
     componentContext: ComponentContext
@@ -18,7 +19,13 @@ class SplitTunnelComponentDesktop(
         scope.launch {
             _allowedAppsFlow.update {
                 prefStore.allowedApps.map {
-                    AppManagerData("", it, icon = it, isSystemApp = false, isChecked = true)
+                    AppManagerData(
+                        name = File(it).nameWithoutExtension,
+                        packageName = it,
+                        icon = it,
+                        isSystemApp = false,
+                        isChecked = true
+                    )
                 }
             }
         }
@@ -58,17 +65,33 @@ class SplitTunnelComponentDesktop(
 
     private fun refreshAllowedFlow() {
         scope.launch {
+            val runningProcesses = _runningProcessesFlow.value
             _allowedAppsFlow.update {
-                prefStore.allowedApps.map {
-                    AppManagerData("", it, icon = null, isSystemApp = false, isChecked = true)
+                prefStore.allowedApps.map { path ->
+                    val existing = runningProcesses.find { it.packageName == path }
+                    AppManagerData(
+                        name = existing?.name ?: File(path).nameWithoutExtension,
+                        packageName = path,
+                        icon = path,
+                        isSystemApp = false,
+                        isChecked = true
+                    )
                 }
             }
         }
     }
 
     override fun onSelectFile() {
-        pickExeFile()?.let {
-            onAddApp(AppManagerData("", it, icon = null, isSystemApp = false, isChecked = true))
+        pickExeFile()?.let { path ->
+            onAddApp(
+                AppManagerData(
+                    name = File(path).nameWithoutExtension,
+                    packageName = path,
+                    icon = path,
+                    isSystemApp = false,
+                    isChecked = true
+                )
+            )
         }
     }
 }

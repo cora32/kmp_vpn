@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -60,36 +58,25 @@ actual fun SplitTunnelScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(
+            top = padding.calculateTopPadding() + 32.dp,
+            start = 16.dp,
+            end = 16.dp,
+            bottom = padding.calculateBottomPadding() + 16.dp
+        ),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         RunningProcessesBox(
             runningProcesses = runningProcesses,
             onAddApp = component::onAddApp,
-            getProcessList = component::getProcessList
+            getProcessList = component::getProcessList,
+            onSelectExe = component::onSelectFile,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         AllowedApps(allowedApps = allowedApps, onRemove = component::onRemoveApp)
-
-        Button(
-            modifier = Modifier.padding(bottom = 80.dp),
-            onClick = component::onSelectFile,
-            colors = ButtonDefaults.buttonColors().copy(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = cWhite
-            )
-        ) {
-            Text(
-                "Select by file",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            )
-        }
     }
 }
 
@@ -100,7 +87,11 @@ fun ColumnScope.AllowedApps(
     onRemove: (AppManagerData) -> Unit
 ) {
     Box(
-        modifier = Modifier.background(Color.Black.copy(alpha = 0.4f)).padding(vertical = 16.dp)
+        modifier = Modifier
+            .background(
+                color = Color.Black.copy(alpha = 0.7f),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+            ).padding(vertical = 16.dp)
             .weight(1f)
     ) {
         Column(
@@ -145,10 +136,16 @@ fun ColumnScope.RunningProcessesBox(
     modifier: Modifier = Modifier,
     runningProcesses: List<AppManagerData>,
     onAddApp: (AppManagerData) -> Unit,
-    getProcessList: () -> Unit
+    getProcessList: () -> Unit,
+    onSelectExe: () -> Unit
 ) {
     Box(
-        modifier = Modifier.background(Color.Black.copy(alpha = 0.4f)).padding(vertical = 16.dp)
+        modifier = Modifier
+            .background(
+                color = Color.Black.copy(alpha = 0.7f),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+            )
+            .padding(vertical = 16.dp)
             .weight(1f)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -168,23 +165,43 @@ fun ColumnScope.RunningProcessesBox(
                         onTap = onAddApp,
                         modifier = Modifier.animateItem()
                     )
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = cWhite
+                    )
                 }
             }
         }
 
-        IconButton(
-            modifier = Modifier.align(Alignment.TopEnd),
-            onClick = getProcessList,
-            colors = IconButtonDefaults.iconButtonColors().copy(
-                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                contentColor = cWhite
-            )
+        Row(
+            modifier = Modifier.align(Alignment.TopEnd)
         ) {
-            Icon(
-                imageVector = VscodeCodiconsRefresh,
-                contentDescription = "Refresh"
-            )
+            IconButton(
+                onClick = onSelectExe,
+                colors = IconButtonDefaults.iconButtonColors().copy(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    contentColor = cWhite
+                )
+            ) {
+                Icon(
+                    imageVector = VscodeCodiconsAdd,
+                    contentDescription = "Pick executable"
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+
+            IconButton(
+                onClick = getProcessList,
+                colors = IconButtonDefaults.iconButtonColors().copy(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    contentColor = cWhite
+                )
+            ) {
+                Icon(
+                    imageVector = VscodeCodiconsRefresh,
+                    contentDescription = "Refresh"
+                )
+            }
         }
     }
 }
@@ -243,25 +260,29 @@ fun RunningProcessItemName(
             modifier = Modifier.size(24.dp).padding(4.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            data.name,
-            style = TextStyle(
-                color = if (data.isChecked) MaterialTheme.colorScheme.primary else cWhite,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal
-            ),
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            data.packageName,
-            style = TextStyle(
-                color = if (data.isChecked) MaterialTheme.colorScheme.primary else cWhite,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Normal
-            ),
-            modifier = Modifier.weight(1f)
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth().height(38.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(
+                data.name,
+                style = TextStyle(
+                    color = if (data.isChecked) MaterialTheme.colorScheme.primary else cWhite,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal
+                ),
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                data.packageName,
+                style = TextStyle(
+                    color = if (data.isChecked) MaterialTheme.colorScheme.primary else cWhite,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Light
+                ),
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
