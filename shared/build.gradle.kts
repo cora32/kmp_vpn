@@ -9,6 +9,11 @@ plugins {
     kotlin("plugin.serialization") version "2.0.0"
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "io.iskopasi.kmpvpntest.generated.resources"
+}
+
 kotlin {
     jvm()
     

@@ -45,7 +45,16 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
 import io.iskopasi.splittunnel.decompose.SplitTunnelComponent
+import io.iskopasi.splittunnel.generated.resources.Res
+import io.iskopasi.splittunnel.generated.resources.loading_processes
+import io.iskopasi.splittunnel.generated.resources.pick_executable
+import io.iskopasi.splittunnel.generated.resources.refresh
+import io.iskopasi.splittunnel.generated.resources.remove
+import io.iskopasi.splittunnel.generated.resources.route_these_apps
+import io.iskopasi.splittunnel.generated.resources.routing_everything
+import io.iskopasi.splittunnel.generated.resources.running_processes
 import io.iskopasi.splittunnel.managers.AppManagerData
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 actual fun SplitTunnelScreen(
@@ -101,7 +110,7 @@ fun ColumnScope.AllowedApps(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Route these apps to the VPN",
+                stringResource(Res.string.route_these_apps),
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
@@ -118,7 +127,7 @@ fun ColumnScope.AllowedApps(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Routing everything into the VPN",
+                            stringResource(Res.string.routing_everything),
                             style = TextStyle(
                                 color = cWhite.copy(alpha = 0.5f),
                                 fontSize = 13.sp
@@ -177,7 +186,7 @@ fun ColumnScope.RunningProcessesBox(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                "Running processes",
+                stringResource(Res.string.running_processes),
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
@@ -195,7 +204,7 @@ fun ColumnScope.RunningProcessesBox(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Loading process list...",
+                            stringResource(Res.string.loading_processes),
                             style = TextStyle(
                                 color = cWhite.copy(alpha = 0.5f),
                                 fontSize = 13.sp
@@ -225,7 +234,7 @@ fun ColumnScope.RunningProcessesBox(
             ) {
                 Icon(
                     imageVector = VscodeCodiconsAdd,
-                    contentDescription = "Pick executable"
+                    contentDescription = stringResource(Res.string.pick_executable)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -239,7 +248,7 @@ fun ColumnScope.RunningProcessesBox(
             ) {
                 Icon(
                     imageVector = VscodeCodiconsRefresh,
-                    contentDescription = "Refresh"
+                    contentDescription = stringResource(Res.string.refresh)
                 )
             }
         }
@@ -289,7 +298,7 @@ fun RunningProcessItemWithRemoveButton(
             onRemove(data)
         }) {
             Text(
-                "Remove",
+                stringResource(Res.string.remove),
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 13.sp,

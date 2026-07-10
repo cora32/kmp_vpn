@@ -8,6 +8,10 @@ plugins {
     kotlin("plugin.serialization") version "2.0.0"
 }
 
+compose.resources {
+    packageOfResClass = "io.iskopasi.dns_filter.generated.resources"
+}
+
 kotlin {
     jvm()
 

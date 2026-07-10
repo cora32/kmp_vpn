@@ -1,0 +1,9 @@
+<resources>
+    <string name="routing_everything">Весь трафик идет через VPN</string>
+    <string name="route_these_apps">Направлять эти приложения в VPN</string>
+    <string name="running_processes">Запущенные процессы</string>
+    <string name="loading_processes">Загрузка списка процессов...</string>
+    <string name="refresh">Обновить</string>
+    <string name="pick_executable">Выбрать файл</string>
+    <string name="remove">Удалить</string>
+</resources>

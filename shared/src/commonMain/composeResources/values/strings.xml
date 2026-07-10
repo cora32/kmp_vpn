@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Proxy VPN</string>
+    <string name="routing_everything">Routing everything into the VPN</string>
+    <string name="route_these_apps">Route these apps to the VPN</string>
+    <string name="running_processes">Running processes</string>
+    <string name="loading_processes">Loading process list...</string>
+    <string name="refresh">Refresh</string>
+    <string name="pick_executable">Pick executable</string>
+    <string name="remove">Remove</string>
+    <string name="enter_domain">Enter domain</string>
+    <string name="nothing_blocked">Nothing is blocked yet</string>
+    <string name="connect">Connect</string>
+    <string name="connecting">Connecting</string>
+    <string name="disconnect">Disconnect</string>
+</resources>

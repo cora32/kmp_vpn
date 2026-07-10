@@ -49,8 +49,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.kmpvpntest.api.isAndroid
 import io.iskopasi.kmpvpntest.decompose.MainComponent
+import io.iskopasi.kmpvpntest.generated.resources.Res
+import io.iskopasi.kmpvpntest.generated.resources.connect
+import io.iskopasi.kmpvpntest.generated.resources.connecting
+import io.iskopasi.kmpvpntest.generated.resources.disconnect
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.silver
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding: PaddingValues) {
@@ -81,9 +86,9 @@ fun PowerButton(modifier: Modifier = Modifier, component: MainComponent) {
     val state by component.state.collectAsStateWithLifecycle()
 
     val buttonText = when (state) {
-        MainComponent.State.Idle -> "Connect"
-        MainComponent.State.Connecting -> "Connecting"
-        MainComponent.State.Connected -> "Disconnect"
+        MainComponent.State.Idle -> stringResource(Res.string.connect)
+        MainComponent.State.Connecting -> stringResource(Res.string.connecting)
+        MainComponent.State.Connected -> stringResource(Res.string.disconnect)
         else -> "Off"
     }
 

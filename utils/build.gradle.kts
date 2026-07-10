@@ -6,6 +6,10 @@ plugins {
     kotlin("plugin.serialization") version "2.0.0"
 }
 
+compose.resources {
+    packageOfResClass = "io.iskopasi.kmpvpntest.utils.generated.resources"
+}
+
 kotlin {
     jvm()
     androidLibrary {
@@ -23,6 +27,7 @@ kotlin {
 
             // Compose
             implementation(libs.compose.ui)
+            implementation(libs.compose.components.resources)
         }
         androidMain.dependencies {
             api(libs.androidx.core.ktx)

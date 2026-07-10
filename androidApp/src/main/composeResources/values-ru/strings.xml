@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Proxy VPN</string>
+    <string name="connect">Подключиться</string>
+    <string name="connecting">Ожидайте</string>
+    <string name="disconnect">Отключиться</string>
+</resources>

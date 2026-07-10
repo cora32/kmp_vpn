@@ -7,6 +7,10 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+compose.resources {
+    packageOfResClass = "io.iskopasi.splittunnel.generated.resources"
+}
+
 kotlin {
     jvm()
 

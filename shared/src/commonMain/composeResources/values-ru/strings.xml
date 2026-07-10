@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Proxy VPN</string>
+    <string name="routing_everything">Весь трафик идет через VPN</string>
+    <string name="route_these_apps">Направлять эти приложения в VPN</string>
+    <string name="running_processes">Запущенные процессы</string>
+    <string name="loading_processes">Загрузка списка процессов...</string>
+    <string name="refresh">Обновить</string>
+    <string name="pick_executable">Выбрать файл</string>
+    <string name="remove">Удалить</string>
+    <string name="enter_domain">Введите домен</string>
+    <string name="nothing_blocked">Ничего еще не заблокировано</string>
+    <string name="connect">Подключиться</string>
+    <string name="connecting">Ожидайте...</string>
+    <string name="disconnect">Отключиться</string>
+</resources>

@@ -45,8 +45,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.dns_filter.decompose.DnsFilterComponent
+import io.iskopasi.dns_filter.generated.resources.Res
+import io.iskopasi.dns_filter.generated.resources.enter_domain
+import io.iskopasi.dns_filter.generated.resources.nothing_blocked
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DnsFilterScreen(
@@ -74,7 +78,7 @@ fun DnsFilterScreen(
                         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Nothing is blocked yet", style = TextStyle(
+                            stringResource(Res.string.nothing_blocked), style = TextStyle(
                                 color = cWhite.copy(alpha = 0.5f), fontSize = 13.sp
 
                             ), fontWeight = FontWeight.Light
@@ -189,7 +193,7 @@ fun InputField(modifier: Modifier = Modifier, onEnter: (String) -> Unit) {
                     isFocused = it.isFocused
                 }.weight(1f), placeholder = {
                     Text(
-                        text = "Enter domain", style = TextStyle(
+                        text = stringResource(Res.string.enter_domain), style = TextStyle(
                             color = cGray.copy(alpha = 0.4f),
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,

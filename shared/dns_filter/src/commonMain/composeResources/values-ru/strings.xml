@@ -1,0 +1,4 @@
+<resources>
+    <string name="enter_domain">Введите доменное имя</string>
+    <string name="nothing_blocked">Еще ничего не заблокировано</string>
+</resources>
