@@ -5,10 +5,13 @@ import io.iskopasi.kmpvpntest.api.PermissionsApi
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.api.getPermissionApi
 import io.iskopasi.kmpvpntest.api.getPrefStore
+import io.iskopasi.kmpvpntest.managers.FilterDao
 import io.iskopasi.kmpvpntest.managers.PingApi
 import io.iskopasi.kmpvpntest.managers.PingApiImpl
 import io.iskopasi.kmpvpntest.managers.ProxyManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
+import io.iskopasi.kmpvpntest.managers.getDatabaseBuilder
+import io.iskopasi.kmpvpntest.managers.getRoomDatabase
 import io.iskopasi.splittunnel.managers.AppManager
 import io.iskopasi.splittunnel.managers.getAppManager
 import org.koin.dsl.module
@@ -16,6 +19,9 @@ import org.koin.dsl.module
 fun getModules() = module {
     single<EventBus> {
         EventBus()
+    }
+    single<FilterDao> {
+        getRoomDatabase(getDatabaseBuilder()).getFilterDao()
     }
     factory<ProxyManager> {
         ProxyManager(

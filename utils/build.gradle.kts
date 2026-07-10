@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization") version "2.0.0"
+    alias(libs.plugins.androidx.room)
+    alias(libs.plugins.ksp)
 }
 
 compose.resources {
@@ -28,9 +30,22 @@ kotlin {
             // Compose
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
+
+            // Room
+            api(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
         }
         androidMain.dependencies {
             api(libs.androidx.core.ktx)
         }
     }
+}
+
+dependencies {
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspJvm", libs.androidx.room.compiler)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }

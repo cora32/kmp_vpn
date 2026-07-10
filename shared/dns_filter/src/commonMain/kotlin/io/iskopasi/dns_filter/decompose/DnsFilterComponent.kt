@@ -1,7 +1,8 @@
 package io.iskopasi.dns_filter.decompose
 
 import com.arkivanov.decompose.ComponentContext
-import io.iskopasi.kmpvpntest.api.PrefStoreApi
+import io.iskopasi.kmpvpntest.managers.Domain
+import io.iskopasi.kmpvpntest.managers.FilterDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,11 +18,15 @@ import org.koin.core.component.inject
 class DnsFilterComponent(
     context: ComponentContext
 ) : ComponentContext by context, KoinComponent {
-    private val prefStore: PrefStoreApi by inject()
+    private val dao: FilterDao by inject()
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val _filterListFlow = MutableStateFlow<Set<String>>(emptySet())
-    val filterListFlow: StateFlow<Set<String>> = _filterListFlow.asStateFlow()
+    private val _filterListFlow = MutableStateFlow<List<Domain>>(emptyList())
+    val filterListFlow: StateFlow<List<Domain>> = _filterListFlow.asStateFlow()
+
+    private val _hasError = MutableStateFlow(false)
+    val hasError: StateFlow<Boolean> = _hasError.asStateFlow()
 
     init {
         scope.launch {
@@ -30,22 +35,33 @@ class DnsFilterComponent(
     }
 
     private fun fetchDomainList() {
-        _filterListFlow.update { prefStore.filterList }
+        scope.launch {
+            _filterListFlow.update { dao.getDomains() }
+        }
     }
 
     fun addDomain(domain: String) {
+        _hasError.update { false }
+
         scope.launch {
             val trimmed = Regex("^(?:https?://)?([^/]+).*$")
                 .find(domain.trim())?.groupValues?.get(1) ?: domain.trim()
 
-            prefStore.filterList += trimmed
+            if (trimmed.isBlank()) {
+                _hasError.update { true }
+                return@launch
+            }
+
+            dao.insert(Domain(domain = trimmed))
+
             fetchDomainList()
         }
     }
 
-    fun onDeleteDomain(domain: String) {
+    fun onDeleteDomain(domain: Domain) {
         scope.launch {
-            prefStore.filterList -= domain
+            dao.delete(domain)
+
             fetchDomainList()
         }
     }

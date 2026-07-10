@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
@@ -48,8 +49,10 @@ import io.iskopasi.dns_filter.decompose.DnsFilterComponent
 import io.iskopasi.dns_filter.generated.resources.Res
 import io.iskopasi.dns_filter.generated.resources.enter_domain
 import io.iskopasi.dns_filter.generated.resources.nothing_blocked
+import io.iskopasi.kmpvpntest.managers.Domain
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
+import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -91,13 +94,14 @@ fun DnsFilterScreen(
         }
         Spacer(Modifier.height(8.dp))
         InputField(
+            hasError = component.hasError,
             onEnter = component::addDomain
         )
     }
 }
 
 @Composable
-fun ListBox(modifier: Modifier = Modifier, items: Set<String>, onDeleteDomain: (String) -> Unit) {
+fun ListBox(modifier: Modifier = Modifier, items: List<Domain>, onDeleteDomain: (Domain) -> Unit) {
     val style = remember {
         TextStyle(
             color = cWhite,
@@ -112,7 +116,7 @@ fun ListBox(modifier: Modifier = Modifier, items: Set<String>, onDeleteDomain: (
 
     LazyColumn(
     ) {
-        items(items = items.toList(), key = { domain -> domain }) { domain ->
+        items(items = items, key = { domain -> domain }) { domain ->
             DomainItem(
                 modifier = itemMod.animateItem(),
                 item = domain,
@@ -128,7 +132,7 @@ fun ListBox(modifier: Modifier = Modifier, items: Set<String>, onDeleteDomain: (
 
 @Composable
 fun DomainItem(
-    modifier: Modifier = Modifier, item: String, style: TextStyle, onDelete: (String) -> Unit
+    modifier: Modifier = Modifier, item: Domain, style: TextStyle, onDelete: (Domain) -> Unit
 ) {
     Row(
         modifier = modifier,
@@ -136,7 +140,7 @@ fun DomainItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = item, style = style
+            text = item.domain, style = style
         )
         IconButton(onClick = { onDelete(item) }) {
             Icon(LucideCircleMinus, contentDescription = null)
@@ -145,10 +149,15 @@ fun DomainItem(
 }
 
 @Composable
-fun InputField(modifier: Modifier = Modifier, onEnter: (String) -> Unit) {
+fun InputField(
+    modifier: Modifier = Modifier,
+    onEnter: (String) -> Unit,
+    hasError: StateFlow<Boolean>
+) {
     var state by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val isError by hasError.collectAsStateWithLifecycle()
 
     fun onSave() {
         onEnter(state)
@@ -168,6 +177,8 @@ fun InputField(modifier: Modifier = Modifier, onEnter: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedTextField(
+                isError = isError,
+                shape = RoundedCornerShape(32.dp),
                 value = state, onValueChange = {
                     state = it
                 }, colors = OutlinedTextFieldDefaults.colors(
