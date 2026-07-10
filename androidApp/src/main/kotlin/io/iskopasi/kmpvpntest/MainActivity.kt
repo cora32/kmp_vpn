@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.arkivanov.decompose.defaultComponentContext
 import io.iskopasi.kmpvpntest.api.PermissionsApi
 import io.iskopasi.kmpvpntest.api.initializeCoil
@@ -24,6 +25,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
     private val permissionApi: PermissionsApi by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         enableEdgeToEdge()
         initializeCoil(this)
         super.onCreate(savedInstanceState)

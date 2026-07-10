@@ -22,6 +22,7 @@ material = "1.14.0"
 room = "2.8.4"
 sqlite = "2.7.0"
 ksp = "2.3.10"
+splashscreen = "1.2.0"
 
 
 [libraries]
@@ -52,6 +53,7 @@ kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-s
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "jetbrains-navigation3" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -21,6 +21,7 @@ dependencies {
     implementation(projects.shared.dnsFilter)
 
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.splashscreen)
 
     implementation(libs.compose.uiToolingPreview)
     implementation(libs.compose.components.resources)
