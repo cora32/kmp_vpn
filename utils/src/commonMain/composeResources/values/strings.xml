@@ -1,3 +1,5 @@
 <resources>
     <string name="utils_message">Hello from Utils</string>
+    <string name="dns_enter_domain">Enter domain</string>
+    <string name="dns_nothing_blocked">Nothing is blocked yet</string>
 </resources>

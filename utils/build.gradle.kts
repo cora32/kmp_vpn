@@ -9,6 +9,7 @@ plugins {
 }
 
 compose.resources {
+    publicResClass = true
     packageOfResClass = "io.iskopasi.kmpvpntest.utils.generated.resources"
 }
 
@@ -18,6 +19,9 @@ kotlin {
         namespace = "io.iskopasi.kmpvpntest.utils"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
+        androidResources {
+            enable = true
+        }
     }
 
     sourceSets {
@@ -29,7 +33,7 @@ kotlin {
 
             // Compose
             implementation(libs.compose.ui)
-            implementation(libs.compose.components.resources)
+            api(libs.compose.components.resources)
 
             // Room
             api(libs.androidx.room.runtime)
@@ -37,6 +41,7 @@ kotlin {
         }
         androidMain.dependencies {
             api(libs.androidx.core.ktx)
+            api(libs.compose.components.resources)
         }
     }
 }

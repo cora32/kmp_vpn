@@ -46,10 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.dns_filter.decompose.DnsFilterComponent
-import io.iskopasi.dns_filter.generated.resources.Res
-import io.iskopasi.dns_filter.generated.resources.enter_domain
-import io.iskopasi.dns_filter.generated.resources.nothing_blocked
 import io.iskopasi.kmpvpntest.managers.Domain
+import io.iskopasi.kmpvpntest.utils.generated.resources.Res
+import io.iskopasi.kmpvpntest.utils.generated.resources.dns_enter_domain
+import io.iskopasi.kmpvpntest.utils.generated.resources.dns_nothing_blocked
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
 import kotlinx.coroutines.flow.StateFlow
@@ -81,7 +81,7 @@ fun DnsFilterScreen(
                         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            stringResource(Res.string.nothing_blocked), style = TextStyle(
+                            stringResource(Res.string.dns_nothing_blocked), style = TextStyle(
                                 color = cWhite.copy(alpha = 0.5f), fontSize = 13.sp
 
                             ), fontWeight = FontWeight.Light
@@ -116,7 +116,7 @@ fun ListBox(modifier: Modifier = Modifier, items: List<Domain>, onDeleteDomain: 
 
     LazyColumn(
     ) {
-        items(items = items, key = { domain -> domain }) { domain ->
+        items(items = items, key = { domain -> domain.id }) { domain ->
             DomainItem(
                 modifier = itemMod.animateItem(),
                 item = domain,
@@ -204,7 +204,7 @@ fun InputField(
                     isFocused = it.isFocused
                 }.weight(1f), placeholder = {
                     Text(
-                        text = stringResource(Res.string.enter_domain), style = TextStyle(
+                        text = stringResource(Res.string.dns_enter_domain), style = TextStyle(
                             color = cGray.copy(alpha = 0.4f),
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,

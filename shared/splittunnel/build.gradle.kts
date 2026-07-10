@@ -8,6 +8,7 @@ plugins {
 }
 
 compose.resources {
+    publicResClass = true
     packageOfResClass = "io.iskopasi.splittunnel.generated.resources"
 }
 
@@ -22,6 +23,9 @@ kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
         }
+        androidResources {
+            enable = true
+        }
     }
 
     sourceSets {
@@ -31,7 +35,7 @@ kotlin {
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
-            implementation(libs.compose.components.resources)
+            api(libs.compose.components.resources)
 
             api(libs.decompose)
             api(libs.essenty.lifecycle)
@@ -43,6 +47,9 @@ kotlin {
             // Coil 3
             api("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
             api("io.coil-kt.coil3:coil-network-okhttp:3.0.0-rc01")
+        }
+        androidMain.dependencies {
+            implementation(libs.compose.components.resources)
         }
         jvmMain.dependencies {
         }

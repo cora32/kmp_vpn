@@ -5,10 +5,11 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    kotlin("plugin.serialization") version "2.0.0"
+    kotlin("plugin.serialization")
 }
 
 compose.resources {
+    publicResClass = true
     packageOfResClass = "io.iskopasi.dns_filter.generated.resources"
 }
 
@@ -23,6 +24,12 @@ kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
         }
+        androidResources {
+            enable = true
+        }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
     sourceSets {
@@ -32,7 +39,7 @@ kotlin {
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
-            implementation(libs.compose.components.resources)
+            api(libs.compose.components.resources)
 
             // Koin
             api("io.insert-koin:koin-core:3.2.0")
@@ -41,6 +48,9 @@ kotlin {
             api(libs.decompose)
             api(libs.essenty.lifecycle)
             implementation(libs.decompose.compose)
+        }
+        androidMain.dependencies {
+            implementation(libs.compose.components.resources)
         }
         jvmMain.dependencies {
         }
