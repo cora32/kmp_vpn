@@ -19,7 +19,7 @@ interface IConfigBuilder {
         protected var port: Int? = null
         protected var username: String? = null
         protected var password: String? = null
-        protected var bindInterface: String? = null
+        protected var inboundInterface: String? = null
         protected var logLevel: String? = null
         protected var routeAllApps: Boolean = true
         protected var appList: Set<String>? = null
@@ -28,9 +28,16 @@ interface IConfigBuilder {
         protected open fun getDnsServersBlock() = mapOf(
             "servers" to listOf(
                 mapOf(
-                    "tag" to "google-dns",
-                    "address" to "tcp://8.8.8.8",
-                    "detour" to "proxy"
+                    "type" to "https",
+                    "tag" to "cloudflare",
+                    "server" to "1.1.1.1",
+                    "path" to "/dns-query",
+                    "detour" to "direct"
+                )
+            ),
+            "rules" to listOf(
+                mapOf(
+                    "server" to "cloudflare"
                 )
             )
         )
@@ -44,8 +51,8 @@ interface IConfigBuilder {
             return this
         }
 
-        fun setInterface(interfaceName: String): Builder {
-            this.bindInterface = interfaceName
+        fun setInboundInterface(interfaceName: String): Builder {
+            this.inboundInterface = interfaceName
             return this
         }
 
@@ -184,7 +191,7 @@ interface IConfigBuilder {
                 "type" to "direct",
                 "tag" to "direct",
                 "domain_strategy" to "prefer_ipv4",
-                "bind_interface" to "en"
+                "bind_interface" to "en0"
             )
 
         protected fun getFilterBlock() =
@@ -234,9 +241,9 @@ interface IConfigBuilder {
                     add(getFilterBlock())
             }
 
-        protected fun getRouteBlock(
+        protected open fun getRouteBlock(
             routeAllApps: Boolean,
-            appList: Set<String>?,
+            appList: Set<String>?, // Used only on Desktops
             filterList: Set<String>?,
             usePackageNames: Boolean
         ): Map<String, Any> {
@@ -248,22 +255,12 @@ interface IConfigBuilder {
                     add(getSniffingBlock())
                     add(getDnsFilterBlock(filterList = filterList))
                 }
-
-                // And then split routing
-                if (!routeAllApps && appList?.isEmpty() == false)
-                    add(
-                        getAppListBlock(
-                            appList = appList,
-                            outbound = Routes.Proxy.name.lowercase(),
-                            usePackageNames = usePackageNames
-                        )
-                    )
             }
 
             return getRouteBlockInner(
-                finalRoute = Routes.Direct.name.lowercase(),
+                finalRoute = Routes.Proxy.name.lowercase(),
                 rules,
-                autoDetectInterface = true
+                autoDetectInterface = false
             )
         }
 
@@ -271,7 +268,7 @@ interface IConfigBuilder {
             when {
                 host == null -> throw Exception("Host must be set")
                 port == null -> throw Exception("Port must be set")
-                bindInterface == null -> throw Exception("Bind interface must be set")
+                inboundInterface == null -> throw Exception("Bind interface must be set")
             }
 
             configMap = buildJsonObject {
@@ -280,14 +277,14 @@ interface IConfigBuilder {
                 }
 
                 put("dns", getDnsServersBlock().toJsonElement())
-                put("inbounds", getInboundBlock(interfaceName = bindInterface!!).toJsonElement())
+                put("inbounds", getInboundBlock(interfaceName = inboundInterface!!).toJsonElement())
                 put(
                     "outbounds", getOutboundBlock(
                         host = host!!,
                         port = port!!,
                         username = username,
                         password = password,
-                        hasFilterBlock = filterList != null
+                        hasFilterBlock = filterList?.isNotEmpty() == true
                     ).toJsonElement()
                 )
 

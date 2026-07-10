@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Intent
 import android.os.Build
 import io.iskopasi.kmpvpntest.HostExtra
+import io.iskopasi.kmpvpntest.LogLevelExtra
 import io.iskopasi.kmpvpntest.PasswordExtra
 import io.iskopasi.kmpvpntest.PortExtra
 import io.iskopasi.kmpvpntest.StartCommand
@@ -31,6 +32,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
                 putExtra(UsernameExtra, proxyData.username)
                 putExtra(PasswordExtra, proxyData.password)
             }
+            putExtra(LogLevelExtra, "debug")
         }
 
         "[VPNLauncher] Starting foreground service...".e

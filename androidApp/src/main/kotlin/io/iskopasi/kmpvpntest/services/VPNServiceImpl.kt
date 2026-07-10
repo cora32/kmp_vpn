@@ -120,7 +120,7 @@ class VPNServiceImpl : VpnService(),
                     username = username,
                     password = password,
                     logLevel = logLevel,
-                    allowedPackages = prefStoreApi.allowedAppsNamesOnly,
+                    allowedPackages = prefStoreApi.allowedAppsNamesOnly, // This is never used by Singbox for Android target as it is configured inside VpnService
                     routeAllAppsIntoVPN = prefStoreApi.routeAllApps,
                     filterList = prefStoreApi.filterList
                 ).e
@@ -365,5 +365,7 @@ class VPNServiceImpl : VpnService(),
 
     override fun writeDebugMessage(message: String?) {
         if (message == null) return
+
+        "[SingBox] $message".e
     }
 }

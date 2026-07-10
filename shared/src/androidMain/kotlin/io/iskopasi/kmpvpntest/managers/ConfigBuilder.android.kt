@@ -19,7 +19,7 @@ internal class ConfigBuilder : IConfigBuilder {
             .setPort(port)
             .setUsername(username)
             .setPassword(password)
-            .setInterface(interfaceName)
+            .setInboundInterface(interfaceName)
             .setRouteAllApps(routeAllAppsIntoVPN)
             .setAppList(allowedPackages)
             .setFilterList(filterList)

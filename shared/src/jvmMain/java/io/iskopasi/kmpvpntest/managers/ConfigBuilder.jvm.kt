@@ -37,70 +37,44 @@ internal class DesktopConfigBuilder : IConfigBuilder {
             )
         }
 
-//        override fun getOutboundItem() =
-//            mapOf(
-//                "type" to "direct",
-//                "tag" to "direct"
-//            )
-//
-//        override fun getOutboundBlock(
-//            host: String,
-//            port: Int,
-//            username: String?,
-//            password: String?,
-//            hasFilterBlock: Boolean
-//        ): List<Map<String, Any>> =
-//            listOf(
-//                if (username != null && password != null)
-//                    getSocks5WithAuthBlock(
-//                        host = host,
-//                        port = port,
-//                        username = username,
-//                        password = password,
-//                    )
-//                else
-//                    getSocks5Block(
-//                        host = host,
-//                        port = port,
-//                    ),
-//
-//                getOutboundItem(),
-//            )
+        override fun getRouteBlock(
+            routeAllApps: Boolean,
+            appList: Set<String>?,
+            filterList: Set<String>?,
+            usePackageNames: Boolean
+        ): Map<String, Any> {
+            val rules = mutableListOf<Map<String, Any>>(
+                getHijackDnsBlock() // Hijack first
+            ).apply {
+                // Sniffing and blocking after
+                if (filterList?.isEmpty() == false) {
+                    add(getSniffingBlock())
+                    add(getDnsFilterBlock(filterList = filterList))
+                }
 
+                // And then split routing
+                if (!routeAllApps && appList?.isEmpty() == false)
+                    add(
+                        getAppListBlock(
+                            appList = appList,
+                            outbound = Routes.Proxy.name.lowercase(),
+                            usePackageNames = usePackageNames
+                        )
+                    )
+            }
 
-//        override fun getAppListBlock(appList: Set<String>?, outbound: String): Map<String, Any> {
-//            return mapOf(
-//                "process_name" to (appList?.toList() ?: emptyList<String>()),
-//                "outbound" to outbound
-//            )
-//        }
-
-//        override fun getRouteBlock(
-//            routeAllApps: Boolean,
-//            appList: Set<String>?,
-//            filterList: Set<String>?
-//        ): Map<String, Any> {
-//            val rules = mutableListOf<Map<String, Any>>().apply {
-//                when {
-//                    !routeAllApps && appList?.isEmpty() == false -> add(getAppListBlock(appList = appList, outbound = Routes.Proxy.name.lowercase()))
-//                    filterList?.isEmpty() == false -> add(getDnsFilterBlock(filterList = filterList))
-//                }
-//
-//                add(getHijackDnsBlock())
-//            }
-//
-//            return getRouteBlockInner(
-//                finalRoute = Routes.Direct.name.lowercase(),
-//                rules,
-//                autoDetectInterface = true
-//            )
-//        }
+            return getRouteBlockInner(
+                finalRoute = Routes.Direct.name.lowercase(),
+                rules,
+                autoDetectInterface = true
+            )
+        }
 
         override fun build(): String {
             when {
                 host == null -> throw Exception("Host must be set")
                 port == null -> throw Exception("Port must be set")
-                bindInterface == null -> throw Exception("Bind interface must be set")
+                inboundInterface == null -> throw Exception("Bind interface must be set")
             }
 
             configMap = buildJsonObject {
@@ -109,14 +83,14 @@ internal class DesktopConfigBuilder : IConfigBuilder {
                 }
 
                 put("dns", getDnsServersBlock().toJsonElement())
-                put("inbounds", getInboundBlock(interfaceName = bindInterface!!).toJsonElement())
+                put("inbounds", getInboundBlock(interfaceName = inboundInterface!!).toJsonElement())
                 put(
                     "outbounds", getOutboundBlock(
                         host = host!!,
                         port = port!!,
                         username = username,
                         password = password,
-                        hasFilterBlock = filterList != null
+                        hasFilterBlock = filterList?.isNotEmpty() == true
                     ).toJsonElement()
                 )
 
@@ -152,7 +126,7 @@ internal class DesktopConfigBuilder : IConfigBuilder {
             .setUsername(username)
             .setPassword(password)
             .setPassword(password)
-            .setInterface(interfaceName)
+            .setInboundInterface(interfaceName)
             .setRouteAllApps(routeAllAppsIntoVPN)
             .setAppList(allowedPackages)
             .setFilterList(filterList)
