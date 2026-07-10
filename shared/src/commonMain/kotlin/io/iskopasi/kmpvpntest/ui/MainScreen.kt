@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,7 +53,9 @@ import io.iskopasi.kmpvpntest.generated.resources.Res
 import io.iskopasi.kmpvpntest.generated.resources.connect
 import io.iskopasi.kmpvpntest.generated.resources.connecting
 import io.iskopasi.kmpvpntest.generated.resources.disconnect
+import io.iskopasi.kmpvpntest.utils.LogoText
 import io.iskopasi.kmpvpntest.utils.theme.cGray
+import io.iskopasi.kmpvpntest.utils.theme.cGray2
 import io.iskopasi.kmpvpntest.utils.theme.silver
 import org.jetbrains.compose.resources.stringResource
 
@@ -65,20 +67,35 @@ fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding:
     ) {
         Column(
             modifier = Modifier
-                .safeContentPadding()
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Logo()
 
-            ProxyBlock(component = component)
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                ProxyBlock(component = component)
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            PowerButton(component = component)
+                PowerButton(component = component)
+            }
         }
     }
+}
+
+@Composable
+fun Logo(modifier: Modifier = Modifier) {
+    Text(
+        LogoText, style = TextStyle(
+            fontFamily = FontFamily.Monospace,
+            color = cGray,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Light
+        )
+    )
 }
 
 @Composable
@@ -93,9 +110,14 @@ fun PowerButton(modifier: Modifier = Modifier, component: MainComponent) {
     }
 
     Surface(
-        modifier = Modifier.width(160.dp).height(80.dp).padding(8.dp),
-        border = BorderStroke(width = 0.5.dp, color = Color.White.copy(alpha = 0.3f)),
-        color = Color(0xFFD7D7D7),
+        modifier = Modifier.width(140.dp).height(60.dp).padding(8.dp),
+        border = BorderStroke(
+            width = 0.5.dp,
+            color = if (state == MainComponent.State.Connected) Color.White.copy(alpha = 0.7f) else Color.White.copy(
+                alpha = 0.3f
+            )
+        ),
+        color = Color.Transparent,
         contentColor = Color.Black,
         shape = CircleShape,
         tonalElevation = 4.dp,
@@ -109,7 +131,10 @@ fun PowerButton(modifier: Modifier = Modifier, component: MainComponent) {
             Text(
                 buttonText,
                 style = TextStyle(
-                    color = cGray,
+                    fontFamily = FontFamily.Monospace,
+                    color = if (state == MainComponent.State.Connected) Color.White.copy(alpha = 0.7f) else Color.White.copy(
+                        alpha = 0.3f
+                    ),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Light,
                     textAlign = TextAlign.Center
@@ -323,10 +348,10 @@ fun Input(
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                errorContainerColor = Color.Transparent,
+                focusedContainerColor = cGray2.copy(alpha = 0.15f),
+                unfocusedContainerColor = cGray2.copy(alpha = 0.15f),
+                disabledContainerColor = cGray2.copy(alpha = 0.15f),
+                errorContainerColor = cGray2.copy(alpha = 0.15f),
                 errorBorderColor = Color.Red,
                 errorLabelColor = Color.Red,
                 errorTextColor = cGray,

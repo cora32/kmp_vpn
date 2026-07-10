@@ -1,11 +1,9 @@
 package io.iskopasi.kmpvpntest
 
-import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -44,7 +42,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -60,9 +61,9 @@ import io.iskopasi.kmpvpntest.theme.TablerRouter
 import io.iskopasi.kmpvpntest.theme.dark
 import io.iskopasi.kmpvpntest.theme.light
 import io.iskopasi.kmpvpntest.ui.MainScreen
+import io.iskopasi.kmpvpntest.utils.theme.cBg
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
-import io.iskopasi.kmpvpntest.utils.theme.silver
 import io.iskopasi.splittunnel.ui.SplitTunnelScreen
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -94,23 +95,24 @@ private val navConfig = SavedStateConfiguration {
 fun AnimatedBackground() {
     val infiniteTransition = rememberInfiniteTransition(label = "BackgroundTransition")
 
-    val backgroundColor by infiniteTransition.animateColor(
-        initialValue = Color(0xFF00E676), // Vibrant Green
-        targetValue = Color(0xFF00E676),
-        animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = 25000
-                Color(0xFF00E676) at 0 // Green
-                Color(0xFFFFB74D) at 5000 // Peach
-                Color(0xFF2979FF) at 10000 // Blue
-                Color(0xFFFF5252) at 15000 // Red
-                Color(0xFFFF6E40) at 20000 // Sunset
-                Color(0xFF00E676) at 25000 // Back to Green
-            },
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "ColorCycle"
-    )
+//    val backgroundColor by infiniteTransition.animateColor(
+//        initialValue = Color(0xFF00E676), // Vibrant Green
+//        targetValue = Color(0xFF00E676),
+//        animationSpec = infiniteRepeatable(
+//            animation = keyframes {
+//                durationMillis = 25000
+//                Color(0xFF00E676) at 0 // Green
+//                Color(0xFFFFB74D) at 5000 // Peach
+//                Color(0xFF2979FF) at 10000 // Blue
+//                Color(0xFFFF5252) at 15000 // Red
+//                Color(0xFFFF6E40) at 20000 // Sunset
+//                Color(0xFF00E676) at 25000 // Back to Green
+//            },
+//            repeatMode = RepeatMode.Restart
+//        ),
+//        label = "ColorCycle"
+//    )
+    val backgroundColor2 = cBg
 
     val lineProgress by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -125,7 +127,7 @@ fun AnimatedBackground() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor)
+            .background(backgroundColor2)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val lineHeight = 0.5.dp.toPx()
@@ -174,18 +176,19 @@ fun App(root: RootComponent) {
                     bottomBar = {
                         NavigationBar(
                             containerColor = Color.Transparent,
+                            tonalElevation = 4.dp
                         ) {
                             Spacer(Modifier.weight(1f))
                             Row(
                                 modifier = Modifier
-                                    .padding(bottom = 8.dp).width(270.dp).height(55.dp)
+                                    .padding(bottom = 8.dp).width(290.dp).height(55.dp)
                                     .border(
                                         width = 0.4.dp,
                                         color = cWhite.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(45.dp)
                                     )
                                     .clip(RoundedCornerShape(45.dp))
-                                    .background(silver)
+                                    .background(Color.Transparent)
                             ) {
                                 NavItem(
                                     key = Screen.Main,
@@ -258,7 +261,7 @@ fun RowScope.NavItem(
     NavigationBarItem(
         modifier = Modifier
             .fillMaxHeight()
-            .background(if (isSelected) Color.White else silver),
+            .background(if (isSelected) Color.Transparent else Color.Transparent),
         selected = isSelected,
         onClick = {
             if (backStack.last() != key) {
@@ -267,8 +270,8 @@ fun RowScope.NavItem(
             }
         },
         colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = Color.Black,
-            selectedTextColor = Color.Black,
+            selectedIconColor = Color.White,
+            selectedTextColor = Color.White,
             indicatorColor = Color.Transparent,
             unselectedIconColor = cGray,
             unselectedTextColor = cGray,
@@ -276,6 +279,14 @@ fun RowScope.NavItem(
             disabledTextColor = MaterialTheme.colorScheme.primary,
         ),
         icon = { Icon(imageVector, contentDescription = null) },
-        label = { Text(text) }
+        label = {
+            Text(
+                text,
+                style = TextStyle(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.ExtraLight
+                )
+            )
+        }
     )
 }

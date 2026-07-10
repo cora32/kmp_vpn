@@ -35,6 +35,8 @@ import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import io.iskopasi.kmpvpntest.api.initializeCoil
 import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.di.getModules
+import io.iskopasi.kmpvpntest.generated.resources.Res
+import io.iskopasi.kmpvpntest.generated.resources.app_name
 import io.iskopasi.kmpvpntest.managers.SingleInstanceManager
 import io.iskopasi.kmpvpntest.managers.VPNLauncher
 import io.iskopasi.kmpvpntest.managers.VPNLauncherInterface
@@ -43,6 +45,7 @@ import io.iskopasi.kmpvpntest.theme.VscodeCodiconsClose
 import io.iskopasi.kmpvpntest.theme.dark
 import io.iskopasi.kmpvpntest.theme.light
 import io.iskopasi.kmpvpntest.utils.theme.cDarkGray
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -144,7 +147,7 @@ fun main() = application {
                 exitApplication()
             },
             state = windowState,
-            title = "KMP VPN",
+            title = stringResource(Res.string.app_name),
             undecorated = true,
             resizable = false
         ) {
@@ -167,7 +170,7 @@ fun main() = application {
                             .background(cDarkGray)
                     ) {
                         Text(
-                            text = "KMP VPN",
+                            text = stringResource(Res.string.app_name),
                             modifier = Modifier.align(Alignment.CenterStart).padding(start = 16.dp),
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
