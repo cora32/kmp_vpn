@@ -7,7 +7,7 @@ and **Windows (JVM)**.
 
 This project demonstrates a VPN implementation sharing core logic across platforms while providing
 native-like experiences for both mobile and desktop users. It uses **sing-box** as the core
-networking engine (driver) to handle secure tunneling and proxying.
+networking engine to handle secure tunneling and proxying.
 
 ## Platforms
 
@@ -16,7 +16,7 @@ networking engine (driver) to handle secure tunneling and proxying.
 
 ## Features
 
-- **sing-box Core**: Powered by the sing-box universal network stack for high-performance proxying.
+- **Sing-box Core**: Powered by the sing-box universal network stack for high-performance proxying.
 - **Split Tunneling**: Choose which apps route through the VPN.
 - **DNS Filtering**: Block unwanted domains at the network level.
 - **Shared UI/Logic**: Built with Compose Multiplatform and Decompose for efficient development.
