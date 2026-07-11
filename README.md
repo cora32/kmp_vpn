@@ -13,21 +13,16 @@ networking engine to handle secure tunneling and proxying.
 
 - **Android**: Mobile application with system-level VPN integration.
 
-  ### Android Demo
-  <video src="https://github.com/cora32/proxy_vpn/blob/master/demo/pvpn.mp4?raw=true" width="400" controls></video>
+  ### Android Demo    
+  https://github.com/user-attachments/assets/ead9a62f-0517-41dc-b40b-8d67a584969c
 
 - **Windows**: Desktop application for secure connectivity on JVM-based systems.
 
   ### Windows Demo
-  <img src="demo/desktop1.jpg" width="400" alt="Main Screen" />
-  <br/>*Main Screen*
-
-  <img src="demo/desktop2.jpg" width="400" alt="DNS Filtering" />
-  <br/>*DNS Filtering Feature*
-
-  <img src="demo/desktop3.jpg" width="400" alt="Split Tunneling" />
-  <br/>*Split Tunneling Feature*
-
+  | *Main Screen*      | *DNS Filtering Feature*       | *Split Tunneling Feature*       |
+  |-------------------|--------------------|--------------------|
+  | ![UI](demo/desktop1.jpg) | ![UI](demo/desktop2.jpg) | ![UI](demo/desktop3.jpg)  |
+  
 ## Features
 
 - **Sing-box Core**: Powered by the sing-box universal network stack for high-performance proxying.
