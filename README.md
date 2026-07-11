@@ -12,7 +12,21 @@ networking engine to handle secure tunneling and proxying.
 ## Platforms
 
 - **Android**: Mobile application with system-level VPN integration.
+
+  ### Android Demo
+  <video src="demo/pvpn.mp4" width="320" controls></video>
+
 - **Windows**: Desktop application for secure connectivity on JVM-based systems.
+
+  ### Windows Demo
+  ![Main Screen](demo/desktop1.jpg)
+  *Main Screen*
+
+  ![DNS Filtering](demo/desktop2.jpg)
+  *DNS Filtering Feature*
+
+  ![Split Tunneling](demo/desktop3.jpg)
+  *Split Tunneling Feature*
 
 ## Features
 
