@@ -29,6 +29,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -95,23 +97,6 @@ private val navConfig = SavedStateConfiguration {
 fun AnimatedBackground() {
     val infiniteTransition = rememberInfiniteTransition(label = "BackgroundTransition")
 
-//    val backgroundColor by infiniteTransition.animateColor(
-//        initialValue = Color(0xFF00E676), // Vibrant Green
-//        targetValue = Color(0xFF00E676),
-//        animationSpec = infiniteRepeatable(
-//            animation = keyframes {
-//                durationMillis = 25000
-//                Color(0xFF00E676) at 0 // Green
-//                Color(0xFFFFB74D) at 5000 // Peach
-//                Color(0xFF2979FF) at 10000 // Blue
-//                Color(0xFFFF5252) at 15000 // Red
-//                Color(0xFFFF6E40) at 20000 // Sunset
-//                Color(0xFF00E676) at 25000 // Back to Green
-//            },
-//            repeatMode = RepeatMode.Restart
-//        ),
-//        label = "ColorCycle"
-//    )
     val backgroundColor2 = cBg
 
     val lineProgress by infiniteTransition.animateFloat(
@@ -149,10 +134,13 @@ fun AnimatedBackground() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun App(root: RootComponent) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
     LaunchedEffect(Unit) {
         root.eventBus.events.collect { event ->
             if (event.isNotEmpty()) {
                 showToast(event)
+                snackbarHostState.showSnackbar(event)
             }
         }
     }
@@ -173,6 +161,7 @@ fun App(root: RootComponent) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = Color.Transparent,
+                    snackbarHost = { SnackbarHost(snackbarHostState) },
                     bottomBar = {
                         NavigationBar(
                             containerColor = Color.Transparent,
@@ -188,7 +177,7 @@ fun App(root: RootComponent) {
                                         shape = RoundedCornerShape(45.dp)
                                     )
                                     .clip(RoundedCornerShape(45.dp))
-                                    .background(Color.Transparent)
+                                    .background(Color.Black.copy(alpha = 0.2f))
                             ) {
                                 NavItem(
                                     key = Screen.Main,

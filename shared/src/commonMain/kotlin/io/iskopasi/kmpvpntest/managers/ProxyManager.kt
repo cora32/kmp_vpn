@@ -10,7 +10,9 @@ class ProxyManager(
     val prefStorage: PrefStoreApi,
     val signalManager: SignalManager,
 ) : KoinComponent {
-    private val pingApi: PingApi by inject()
+    private val proxyApi: ProxyApi by inject()
+    private var lastFetchTimestamp = 0L
+    private var tempList = emptyList<ProxyData>()
 
     var proxyData: ProxyData
         get() = prefStorage.proxyData
@@ -61,8 +63,17 @@ class ProxyManager(
         return signalManager.signalBus.first { it != null } == true
     }
 
-    suspend fun checkConnection(isCertCheckEnabled: Boolean): Boolean = pingApi.connect(
+    suspend fun checkConnection(isCertCheckEnabled: Boolean): Boolean = proxyApi.connect(
         proxyData = proxyData,
         isCertCheckEnabled = isCertCheckEnabled
     )
+
+    suspend fun fetchProxyList(): List<ProxyData> {
+        if (lastFetchTimestamp < 5 * 60 * 1000 || tempList.isEmpty()) {
+            lastFetchTimestamp = System.currentTimeMillis()
+            tempList = proxyApi.fetchProxyList()
+        }
+
+        return tempList.shuffled().take(20)
+    }
 }

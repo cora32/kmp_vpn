@@ -5,6 +5,7 @@ import io.iskopasi.kmpvpntest.api.EventBus
 import io.iskopasi.kmpvpntest.api.PermissionsApi
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.api.e
+import io.iskopasi.kmpvpntest.managers.ProxyData
 import io.iskopasi.kmpvpntest.managers.ProxyManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +35,12 @@ interface MainComponent {
     val isHostError: StateFlow<Boolean>
     val isPortError: StateFlow<Boolean>
 
+    val proxyList: StateFlow<List<ProxyData>>
+    val isProxyListLoading: StateFlow<Boolean>
+
+
     fun onConnect()
+    fun onConnect(data: ProxyData)
     fun onHostChanged(value: String)
     fun onPortChanged(value: String)
     fun onUsernameChanged(value: String)
@@ -42,10 +48,12 @@ interface MainComponent {
     fun onAuthChanged(value: Boolean)
     fun onCertCheckChanged(value: Boolean)
     fun tryParseSocks5(text: String)
+    fun fetchNewProxies()
 
     enum class State {
         Idle,
         Connecting,
+        Disconnecting,
         Connected,
         Error
     }
@@ -63,6 +71,8 @@ class MainComponentImpl(
     private val _isHostError = MutableStateFlow(false)
     private val _isPortError = MutableStateFlow(false)
     private val _errorMessage = MutableStateFlow("")
+    private val _proxyList = MutableStateFlow(emptyList<ProxyData>())
+    private val _isProxyListLoading = MutableStateFlow(false)
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -84,6 +94,8 @@ class MainComponentImpl(
     override val errorMessage = _errorMessage.asStateFlow()
     override val isHostError = _isHostError.asStateFlow()
     override val isPortError = _isPortError.asStateFlow()
+    override val proxyList = _proxyList.asStateFlow()
+    override val isProxyListLoading = _isProxyListLoading.asStateFlow()
     override val refreshSignalFlow = MutableStateFlow(false)
 
     init {
@@ -97,6 +109,8 @@ class MainComponentImpl(
                     setState(MainComponent.State.Idle)
                 }
         }
+
+        fetchNewProxies()
     }
 
     private fun validateHost(host: String): Boolean {
@@ -118,6 +132,37 @@ class MainComponentImpl(
         }
 
         return isValid
+    }
+
+    override fun fetchNewProxies() {
+        _isProxyListLoading.update {
+            true
+        }
+        scope.launch {
+            try {
+                val list = proxyManager.fetchProxyList()
+
+                _proxyList.update {
+                    list
+                }
+            } catch (ex: Exception) {
+                signalManager.onError("$ex")
+            }
+
+            _isProxyListLoading.update {
+                false
+            }
+        }
+    }
+
+    override fun onConnect(data: ProxyData) {
+        onHostChanged(data.host)
+        onPortChanged(data.port)
+        onUsernameChanged(data.username)
+        onPasswordChanged(data.password)
+        onAuthChanged(data.username.isNotEmpty())
+
+        onConnect()
     }
 
     override fun onConnect() {
@@ -160,63 +205,22 @@ class MainComponentImpl(
     override fun tryParseSocks5(text: String) {
         "Trying to parse: $text".e
 
-        val trimmed = text.trim()
-        // Regex patterns for the different formats
-        val patterns = listOf(
-            // socks5://username:password@host:port
-            Regex("""^socks5://([^:@]+):([^:@]+)@([^:/]+):(\d+)$"""),
-            // username:password@host:port
-            Regex("""^([^:@]+):([^:@]+)@([^:/]+):(\d+)$"""),
-            // socks5://host:port
-            Regex("""^socks5://([^:/]+):(\d+)$"""),
-            // host:port
-            Regex("""^([^:/]+):(\d+)$""")
-        )
-
-        for ((index, regex) in patterns.withIndex()) {
-            val match = regex.find(trimmed) ?: continue
-            val groups = match.groupValues
-
-            when (index) {
-                0 -> { // socks5://username:password@host:port
-                    onUsernameChanged(groups[1])
-                    onPasswordChanged(groups[2])
-                    onHostChanged(groups[3])
-                    onPortChanged(groups[4])
-                    onAuthChanged(true)
-                }
-
-                1 -> { // username:password@host:port
-                    onUsernameChanged(groups[1])
-                    onPasswordChanged(groups[2])
-                    onHostChanged(groups[3])
-                    onPortChanged(groups[4])
-                    onAuthChanged(true)
-                }
-
-                2 -> { // socks5://host:port
-                    onHostChanged(groups[1])
-                    onPortChanged(groups[2])
-                    onAuthChanged(false)
-                }
-
-                3 -> { // host:port
-                    onHostChanged(groups[1])
-                    onPortChanged(groups[2])
-                    onAuthChanged(false)
-                }
-            }
+        ProxyData.parse(text)?.let { data ->
+            onHostChanged(data.host)
+            onPortChanged(data.port)
+            onUsernameChanged(data.username)
+            onPasswordChanged(data.password)
+            onAuthChanged(data.username.isNotEmpty())
 
             refreshSignalFlow.update {
                 true
             }
-            return // Stop after first successful match
-        }
-
-        // expected ip
-        onHostChanged(text)
-        refreshSignalFlow.update {
-            true
+        } ?: run {
+            // expected ip
+            onHostChanged(text)
+            refreshSignalFlow.update {
+                true
+            }
         }
     }
 
@@ -225,6 +229,8 @@ class MainComponentImpl(
     }
 
     private fun disconnect() {
+        setState(MainComponent.State.Disconnecting)
+
         proxyManager.stopVPN()
         proxyManager.signalManager.reset()
         setState(MainComponent.State.Idle)

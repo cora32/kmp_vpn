@@ -6,8 +6,8 @@ import io.iskopasi.kmpvpntest.api.PrefStoreApi
 import io.iskopasi.kmpvpntest.api.getPermissionApi
 import io.iskopasi.kmpvpntest.api.getPrefStore
 import io.iskopasi.kmpvpntest.managers.FilterDao
-import io.iskopasi.kmpvpntest.managers.PingApi
-import io.iskopasi.kmpvpntest.managers.PingApiImpl
+import io.iskopasi.kmpvpntest.managers.ProxyApi
+import io.iskopasi.kmpvpntest.managers.ProxyApiImpl
 import io.iskopasi.kmpvpntest.managers.ProxyManager
 import io.iskopasi.kmpvpntest.managers.SignalManager
 import io.iskopasi.kmpvpntest.managers.getDatabaseBuilder
@@ -39,8 +39,8 @@ fun getModules() = module {
     single<SignalManager> {
         SignalManager()
     }
-    factory<PingApi> {
-        PingApiImpl()
+    factory<ProxyApi> {
+        ProxyApiImpl()
     }
     factory<AppManager> {
         getAppManager()

@@ -56,6 +56,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
             val interfaceName = "KMPVPN_${System.currentTimeMillis()}"
 
             "--> proxyData: $proxyData".e
+            "--> filterList: ${prefStore.filterList}".e
 
             // 1. Prepare Config
             val config = getConfigBuilder().getConfig(

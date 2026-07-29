@@ -10,6 +10,10 @@
     <string name="enter_domain">Введите домен</string>
     <string name="nothing_blocked">Ничего еще не заблокировано</string>
     <string name="connect">Подключиться</string>
+    <string name="disconnecting">Отключение...</string>
     <string name="connecting">Ожидайте...</string>
+    <string name="working">Ожидайте...</string>
     <string name="disconnect">Отключиться</string>
+    <string name="custom">Ручной ввод</string>
+    <string name="list">Список прокси</string>
 </resources>

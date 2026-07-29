@@ -5,6 +5,8 @@ const val ClientIP = "172.19.0.2"
 const val DNSServer = "8.8.8.8"
 const val DefaultRoute = "0.0.0.0"
 const val Ipify = "https://api.ipify.org/?format=json"
+const val ProxyListUrl =
+    "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.json"
 
 const val StartCommand = "StartCommand"
 const val StopCommand = "StopCommand"

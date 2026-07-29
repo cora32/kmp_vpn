@@ -1,15 +1,14 @@
 package io.iskopasi.kmpvpntest.api
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 class EventBus {
-    private val _events = MutableStateFlow("")
-    val events: StateFlow<String> = _events.asStateFlow()
+    private val _events = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val events: SharedFlow<String> = _events.asSharedFlow()
 
     fun sendEvent(event: String) {
-        _events.update { event }
+        _events.tryEmit(event)
     }
 }

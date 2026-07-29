@@ -10,6 +10,10 @@
     <string name="enter_domain">Enter domain</string>
     <string name="nothing_blocked">Nothing is blocked yet</string>
     <string name="connect">Connect</string>
-    <string name="connecting">Connecting</string>
+    <string name="connecting">Connecting...</string>
+    <string name="disconnecting">Disconnecting...</string>
+    <string name="working">Working...</string>
     <string name="disconnect">Disconnect</string>
+    <string name="custom">Manual input</string>
+    <string name="list">Proxy list</string>
 </resources>

@@ -1,6 +1,6 @@
 <resources>
     <string name="routing_everything">Routing everything into the VPN</string>
-    <string name="route_these_apps">Route these apps to the VPN</string>
+    <string name="route_these_apps">Route only listed apps into the VPN</string>
     <string name="running_processes">Running processes</string>
     <string name="loading_processes">Loading process list...</string>
     <string name="refresh">Refresh</string>
