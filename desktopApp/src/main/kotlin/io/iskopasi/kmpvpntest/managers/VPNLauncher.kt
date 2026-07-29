@@ -19,6 +19,7 @@ const val WintunDll = "wintun.dll"
 class VPNLauncher : VPNLauncherInterface, KoinComponent {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val prefStore: PrefStoreApi by inject()
+    private val dao: FilterDao by inject()
     private val signalManager: SignalManager by inject()
     private val workDir = File(System.getProperty("user.home"), ".kmpvpn").apply { mkdirs() }
     private var vpnProcess: Process? = null
@@ -53,10 +54,11 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
 
             val proxyData = prefStore.proxyData
             val isAuthEnabled = prefStore.isAuthEnabled
+            val filterList = dao.getDomains().map { it.domain }.toSet()
             val interfaceName = "KMPVPN_${System.currentTimeMillis()}"
 
             "--> proxyData: $proxyData".e
-            "--> filterList: ${prefStore.filterList}".e
+            "--> filterList: ${filterList}".e
 
             // 1. Prepare Config
             val config = getConfigBuilder().getConfig(
@@ -68,7 +70,7 @@ class VPNLauncher : VPNLauncherInterface, KoinComponent {
                 interfaceName = interfaceName,
                 routeAllAppsIntoVPN = prefStore.routeAllApps,
                 allowedPackages = prefStore.allowedAppsNamesOnly,
-                filterList = prefStore.filterList
+                filterList = filterList
             )
             "--> config: $config".e
             val configFile = File(workDir, "config.json").apply { writeText(config) }

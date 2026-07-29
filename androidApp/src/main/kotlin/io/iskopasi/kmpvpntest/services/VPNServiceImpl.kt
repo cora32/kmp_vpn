@@ -44,6 +44,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import java.io.File
 
@@ -53,6 +54,8 @@ class VPNServiceImpl : VpnService(),
     private val prefStoreApi: PrefStoreApi by inject()
     private val signalManager: SignalManager by inject()
     private val nManager: NManager by inject()
+    private val dao: io.iskopasi.kmpvpntest.managers.FilterDao by inject()
+
     private var vpnInterface: ParcelFileDescriptor? = null
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var commandServer: CommandServer? = null
@@ -112,8 +115,10 @@ class VPNServiceImpl : VpnService(),
             ex.printStackTrace()
         }
 
-        serviceScope.apply {
+        serviceScope.launch {
             try {
+                val filterList = dao.getDomains().map { it.domain }.toSet()
+
                 val configData = getConfigBuilder().getConfig(
                     host = host,
                     port = port,
@@ -122,7 +127,7 @@ class VPNServiceImpl : VpnService(),
                     logLevel = logLevel,
                     allowedPackages = prefStoreApi.allowedAppsNamesOnly, // This is never used by Singbox for Android target as it is configured inside VpnService
                     routeAllAppsIntoVPN = prefStoreApi.routeAllApps,
-                    filterList = prefStoreApi.filterList
+                    filterList = filterList
                 ).e
 
                 // Configure control server

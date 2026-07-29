@@ -7,7 +7,6 @@ interface PrefStoreApi : KoinComponent {
     var proxyData: ProxyData
     var allowedApps: Set<String>
     var allowedAppsNamesOnly: Set<String>
-    var filterList: Set<String>
     var routeAllApps: Boolean
     var showSystemApps: Boolean
     var isAuthEnabled: Boolean
