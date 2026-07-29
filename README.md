@@ -19,9 +19,9 @@ networking engine to handle secure tunneling and proxying.
 - **Windows**: Desktop application for secure connectivity on JVM-based systems.
 
   ### Windows Demo
-  | *Main Screen*      | *DNS Filtering Feature*       | *Split Tunneling Feature*       |
-  |-------------------|--------------------|--------------------|
-  | ![UI](demo/desktop1.jpg) | ![UI](demo/desktop2.jpg) | ![UI](demo/desktop3.jpg)  |
+  | *Main Screen (Proxy list)* | *Main screen (Manual input)* | *DNS Filtering Feature*  | *Split Tunneling Feature*       |
+    |----------------------------|------------------------------|--------------------------|--------------------|
+  | ![UI](demo/desktop1.jpg)   | ![UI](demo/desktop4.jpg)     | ![UI](demo/desktop2.jpg) | ![UI](demo/desktop3.jpg) |
   
 ## Features
 
@@ -29,6 +29,11 @@ networking engine to handle secure tunneling and proxying.
 - **Split Tunneling**: Choose which apps route through the VPN.
 - **DNS Filtering**: Block unwanted domains at the network level.
 - **Shared UI/Logic**: Built with Compose Multiplatform and Decompose for efficient development.
+
+## Credits
+
+- **Proxy List**: This project uses a public proxy list provided
+  by [proxifly/free-proxy-list](https://github.com/proxifly/free-proxy-list).
 
 ## Project Structure
 
