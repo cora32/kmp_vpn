@@ -1,3 +1,5 @@
+
+
 # ProxyVPN
 
 A cross-platform VPN application built using **Kotlin Multiplatform (KMP)**, targeting **Android**
@@ -14,7 +16,8 @@ networking engine to handle secure tunneling and proxying.
 - **Android**: Mobile application with system-level VPN integration.
 
   ### Android Demo    
-  https://github.com/user-attachments/assets/ead9a62f-0517-41dc-b40b-8d67a584969c
+
+  https://github.com/user-attachments/assets/7682044f-f60d-4b2c-868b-3a33e7ffde44
 
 - **Windows**: Desktop application for secure connectivity on JVM-based systems.
 
