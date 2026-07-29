@@ -51,12 +51,18 @@ fun ListProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
     val isProxyListLoading by component.isProxyListLoading.collectAsStateWithLifecycle()
     val state by component.state.collectAsStateWithLifecycle()
 
-    Box(contentAlignment = Alignment.Center)
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    )
     {
         AnimatedContent(targetState = isProxyListLoading, contentAlignment = Alignment.Center) {
             when (it) {
                 true ->
-                    Box {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
                             color = cDarkGray

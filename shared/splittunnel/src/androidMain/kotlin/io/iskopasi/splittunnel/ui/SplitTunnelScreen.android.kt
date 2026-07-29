@@ -121,7 +121,8 @@ actual fun SplitTunnelScreen(component: SplitTunnelComponent, padding: PaddingVa
                         app = app,
                         onAppChecked = component::onCheckApp,
                         enabled = !routeAllApps,
-                        toggleColors = toggleColors
+                        toggleColors = toggleColors,
+                        modifier = Modifier.animateItem()
                     )
                 }
             }
