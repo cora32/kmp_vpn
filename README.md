@@ -37,6 +37,7 @@ networking engine to handle secure tunneling and proxying.
 
 - **Proxy List**: This project uses a public proxy list provided
   by [proxifly/free-proxy-list](https://github.com/proxifly/free-proxy-list).
+- **VPN Engine**: This project is powered by [sing-box](https://github.com/sagernet/sing-box).
 
 ## Project Structure
 
