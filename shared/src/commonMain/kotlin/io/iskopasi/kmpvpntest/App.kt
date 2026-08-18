@@ -80,6 +80,7 @@ sealed interface Screen : NavKey {
     @Serializable
     data object DnsFilter : Screen
 
+    @Serializable
     data object SplitTunnel : Screen
 }
 
