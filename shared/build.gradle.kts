@@ -16,8 +16,8 @@ compose.resources {
 
 kotlin {
     jvm()
-    
-    androidLibrary {
+
+    android {
        namespace = "io.iskopasi.kmpvpntest.shared"
        compileSdk = libs.versions.android.compileSdk.get().toInt()
        minSdk = libs.versions.android.minSdk.get().toInt()
@@ -38,13 +38,13 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
 
             // Koin
-            api("io.insert-koin:koin-android:3.2.0")
+            api(libs.koin.android)
 
             // Singbox
             api(files("libs/singbox.aar"))
 
             //OkHttp
-            implementation("io.ktor:ktor-client-okhttp:3.5.0")
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             api(projects.utils)
@@ -65,24 +65,24 @@ kotlin {
             implementation(libs.decompose.compose)
 
             // Koin
-            api("io.insert-koin:koin-core:3.2.0")
+            api(libs.koin.core)
 
             // Json
-            api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+            api(libs.kotlinx.serialization.json)
 
             // Ktor
-            implementation("io.ktor:ktor-client-core:3.5.0")
-            implementation("io.ktor:ktor-client-content-negotiation:3.5.0")
-            implementation("io.ktor:ktor-serialization-kotlinx-json:3.5.0")
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
 
-            implementation("io.ktor:ktor-client-okhttp:3.5.0")
+            implementation(libs.ktor.client.okhttp)
 
             // Nav3
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.jetbrains.navigation3.ui)
         }
         jvmMain.dependencies {
-            implementation("ch.qos.logback:logback-classic:1.5.34")
+            implementation(libs.logback.classic)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
