@@ -92,6 +92,9 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download Android APK
         uses: actions/download-artifact@v5
         with:
