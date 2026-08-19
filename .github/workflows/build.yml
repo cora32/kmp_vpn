@@ -10,6 +10,7 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    environment: release_key
     steps:
       - uses: actions/checkout@v4
 
@@ -25,9 +26,12 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.RELEASE_KEY }}" > keystore.base64
-          base64 --decode keystore.base64 > androidApp/release-keystore.jks
-          [ -s androidApp/release-keystore.jks ] || { echo "Keystore file is empty"; exit 1; }
+          if [ -z "${{ secrets.RELEASE_KEY }}" ]; then
+            echo "Error: RELEASE_KEY secret is empty or not found."
+            exit 1
+          fi
+          echo "${{ secrets.RELEASE_KEY }}" | base64 --decode > androidApp/release-keystore.jks
+          [ -s androidApp/release-keystore.jks ] || { echo "Keystore file is empty after decoding"; exit 1; }
 
       # Run the Gradle build with the injected environment variables
       - name: Build Signed Release APK
