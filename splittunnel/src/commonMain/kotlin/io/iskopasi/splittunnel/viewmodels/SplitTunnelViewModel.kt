@@ -1,12 +1,11 @@
-package io.iskopasi.splittunnel.decompose
+package io.iskopasi.splittunnel.viewmodels
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
-import io.iskopasi.kmpvpntest.api.e
 import io.iskopasi.splittunnel.managers.AppManager
 import io.iskopasi.splittunnel.managers.AppManagerData
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +15,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-interface SplitTunnelComponent {
+interface ISplitTunnelViewModel {
     val isLoading: StateFlow<Boolean>
     val appList: StateFlow<List<AppManagerData>>
     val showSystemAppsFlow: StateFlow<Boolean>
@@ -41,17 +40,14 @@ interface SplitTunnelComponent {
     fun getAppList()
 }
 
-abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponent {
+abstract class SplitTunnelBaseViewModel : ISplitTunnelViewModel, ViewModel(), KoinComponent {
     protected val prefStore: PrefStoreApi by inject()
     protected val appManager: AppManager by inject()
-
-    protected val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private var currentAppList = listOf<AppManagerData>()
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isLoading = _isLoading.asStateFlow()
-//    protected val allowedAppsMap = mutableMapOf<String, Boolean>()
 
     protected val _routeAllAppsFlow: MutableStateFlow<Boolean> =
         MutableStateFlow(prefStore.routeAllApps)
@@ -73,7 +69,7 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
             true
         }
 
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val allApps = appManager.getApps(
                 selectedAppsMap = emptyMap(),
                 showSystemApps = _showSystemAppsFlow.value
@@ -137,7 +133,6 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
     }
 
     override fun toggleRouteAllApps(value: Boolean) {
-        "===> toggleShowSystemApps: $value".e
         _routeAllAppsFlow.update {
             value
         }
@@ -152,8 +147,10 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
 
         prefStore.showSystemApps = value
 
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             resortAppList(showSystemApp = value)
         }
     }
 }
+
+expect fun getSplitTunnelViewModel(): ISplitTunnelViewModel

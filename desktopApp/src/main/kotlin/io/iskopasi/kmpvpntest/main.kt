@@ -30,10 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import com.arkivanov.decompose.DefaultComponentContext
-import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import io.iskopasi.kmpvpntest.api.initializeCoil
-import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.di.getModules
 import io.iskopasi.kmpvpntest.generated.resources.Res
 import io.iskopasi.kmpvpntest.generated.resources.app_name
@@ -47,10 +44,12 @@ import io.iskopasi.kmpvpntest.theme.light
 import io.iskopasi.kmpvpntest.utils.theme.cDarkGray
 import io.iskopasi.kmpvpntest.viewmodels.HomeViewModel
 import io.iskopasi.kmpvpntest.viewmodels.IHomeViewModel
+import io.iskopasi.splittunnel.viewmodels.SplitTunnelViewModelDesktop
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import java.io.File
 
@@ -122,15 +121,14 @@ fun main() {
                     single<VPNLauncherInterface> {
                         VPNLauncher()
                     }
+                },
+
+                // Platform specific ViewModels
+                module {
+                    viewModelOf(::SplitTunnelViewModelDesktop)
                 }
             )
         }
-
-        val model = RootComponent(
-            componentContext = DefaultComponentContext(
-                LifecycleRegistry()
-            ),
-        )
 
         val interactionSourceHide = remember { MutableInteractionSource() }
         val interactionSourceClose = remember { MutableInteractionSource() }
@@ -220,7 +218,7 @@ fun main() {
                         }
                     }
 
-                    App(root = model, homeViewModel = homeViewModel)
+                    App(homeViewModel = homeViewModel)
                 }
             }
         }

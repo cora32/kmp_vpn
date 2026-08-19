@@ -1,5 +1,6 @@
 package io.iskopasi.kmpvpntest.di
 
+import io.iskopasi.dns_filter.viewmodels.DnsFilterViewModel
 import io.iskopasi.kmpvpntest.api.EventBus
 import io.iskopasi.kmpvpntest.api.PermissionsApi
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
@@ -54,4 +55,5 @@ fun getModules() = module {
     }
     // ViewModels
     viewModelOf(::HomeViewModel)
+    viewModelOf(::DnsFilterViewModel)
 }

@@ -1,22 +1,18 @@
-package io.iskopasi.kmpvpntest.api
+package io.iskopasi.splittunnel.viewmodels
 
-import com.arkivanov.decompose.ComponentContext
-import io.iskopasi.splittunnel.decompose.SplitTunnelComponent
-import io.iskopasi.splittunnel.decompose.SplitTunnelComponentAbstract
+import androidx.lifecycle.viewModelScope
 import io.iskopasi.splittunnel.getRunningProcesses
 import io.iskopasi.splittunnel.managers.AppManagerData
 import io.iskopasi.splittunnel.pickExeFile
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import java.io.File
 
-class SplitTunnelComponentDesktop(
-    componentContext: ComponentContext
-) : SplitTunnelComponentAbstract(), ComponentContext by componentContext, KoinComponent {
-
+class SplitTunnelViewModelDesktop : SplitTunnelBaseViewModel(), KoinComponent {
     init {
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _allowedAppsFlow.update {
                 prefStore.allowedApps.map {
                     AppManagerData(
@@ -32,7 +28,7 @@ class SplitTunnelComponentDesktop(
     }
 
     override fun getProcessList() {
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val processList = getRunningProcesses()
 
             _runningProcessesFlow.update {
@@ -42,7 +38,7 @@ class SplitTunnelComponentDesktop(
     }
 
     override fun onAddApp(data: AppManagerData) {
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             data.isChecked = true
             prefStore.allowedApps += data.packageName
 
@@ -53,7 +49,7 @@ class SplitTunnelComponentDesktop(
     }
 
     override fun onRemoveApp(data: AppManagerData) {
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             data.isChecked = false
             prefStore.allowedApps -= data.packageName
 
@@ -64,7 +60,7 @@ class SplitTunnelComponentDesktop(
     }
 
     private fun refreshAllowedFlow() {
-        scope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val runningProcesses = _runningProcessesFlow.value
             _allowedAppsFlow.update {
                 prefStore.allowedApps.map { path ->
@@ -96,5 +92,5 @@ class SplitTunnelComponentDesktop(
     }
 }
 
-actual fun getSplitTunnelComponent(context: ComponentContext): SplitTunnelComponent =
-    SplitTunnelComponentDesktop(context)
+actual fun getSplitTunnelViewModel(): ISplitTunnelViewModel =
+    SplitTunnelViewModelDesktop()

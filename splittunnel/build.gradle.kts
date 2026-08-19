@@ -37,12 +37,10 @@ kotlin {
             implementation(libs.compose.ui)
             api(libs.compose.components.resources)
 
-            api(libs.decompose)
-            api(libs.essenty.lifecycle)
-            implementation(libs.decompose.compose)
-
             // Koin
-            api("io.insert-koin:koin-core:3.2.0")
+            implementation(libs.koin.core)
+            implementation(libs.koin.viewmodel)
+            implementation(libs.koin.compose.viewmodel)
 
             // Coil 3
             api("io.coil-kt.coil3:coil-compose:3.0.0-rc01")

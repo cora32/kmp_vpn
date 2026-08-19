@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.iskopasi.dns_filter.decompose.DnsFilterComponent
+import io.iskopasi.dns_filter.viewmodels.DnsFilterViewModel
 import io.iskopasi.kmpvpntest.managers.Domain
 import io.iskopasi.kmpvpntest.utils.generated.resources.Res
 import io.iskopasi.kmpvpntest.utils.generated.resources.dns_enter_domain
@@ -54,12 +54,14 @@ import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
 import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun DnsFilterScreen(
-    modifier: Modifier = Modifier, component: DnsFilterComponent, padding: PaddingValues
+    modifier: Modifier = Modifier, padding: PaddingValues
 ) {
-    val items by component.filterListFlow.collectAsStateWithLifecycle()
+    val model = koinViewModel<DnsFilterViewModel>()
+    val items by model.filterListFlow.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier.padding(top = padding.calculateTopPadding() + 32.dp)
@@ -88,14 +90,14 @@ fun DnsFilterScreen(
                         )
                     }
 
-                    else -> ListBox(items = it, onDeleteDomain = component::onDeleteDomain)
+                    else -> ListBox(items = it, onDeleteDomain = model::onDeleteDomain)
                 }
             }
         }
         Spacer(Modifier.height(8.dp))
         InputField(
-            hasError = component.hasError,
-            onEnter = component::addDomain
+            hasError = model.hasError,
+            onEnter = model::addDomain
         )
     }
 }

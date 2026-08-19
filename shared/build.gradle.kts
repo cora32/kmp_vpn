@@ -59,11 +59,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
-            // Decompose
-            api(libs.decompose)
-            api(libs.essenty.lifecycle)
-            implementation(libs.decompose.compose)
-
             // Koin
             api(libs.koin.core)
             api(libs.koin.viewmodel)

@@ -37,12 +37,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
-import io.iskopasi.splittunnel.decompose.SplitTunnelComponent
 import io.iskopasi.splittunnel.managers.AppManagerData
+import io.iskopasi.splittunnel.viewmodels.SplitTunnelViewModelAndroid
+import org.koin.compose.viewmodel.koinViewModel
 
 @ExperimentalMaterial3ExpressiveApi
 @Composable
-actual fun SplitTunnelScreen(component: SplitTunnelComponent, padding: PaddingValues) {
+actual fun SplitTunnelScreen(padding: PaddingValues) {
+    val model = koinViewModel<SplitTunnelViewModelAndroid>()
     val toggleColors = ToggleButtonDefaults.toggleButtonColors(
         containerColor = Color.Transparent,
         contentColor = cWhite,
@@ -52,13 +54,13 @@ actual fun SplitTunnelScreen(component: SplitTunnelComponent, padding: PaddingVa
         checkedContentColor = Color.Black
     )
 
-    val appList by component.appList.collectAsStateWithLifecycle()
-    val showSystemApps by component.showSystemAppsFlow.collectAsStateWithLifecycle()
-    val routeAllApps by component.routeAllAppsFlow.collectAsStateWithLifecycle()
-    val isLoading by component.isLoading.collectAsStateWithLifecycle()
+    val appList by model.appList.collectAsStateWithLifecycle()
+    val showSystemApps by model.showSystemAppsFlow.collectAsStateWithLifecycle()
+    val routeAllApps by model.routeAllAppsFlow.collectAsStateWithLifecycle()
+    val isLoading by model.isLoading.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        component.getAppList()
+        model.getAppList()
     }
 
     Box(
@@ -82,7 +84,7 @@ actual fun SplitTunnelScreen(component: SplitTunnelComponent, padding: PaddingVa
                 )
                 ToggleButton(
                     checked = routeAllApps,
-                    onCheckedChange = component::toggleRouteAllApps,
+                    onCheckedChange = model::toggleRouteAllApps,
                     colors = toggleColors
                 ) {
                     Text(if (routeAllApps) "Yes" else "No")
@@ -104,7 +106,7 @@ actual fun SplitTunnelScreen(component: SplitTunnelComponent, padding: PaddingVa
                 )
                 ToggleButton(
                     checked = showSystemApps,
-                    onCheckedChange = component::toggleShowSystemApps,
+                    onCheckedChange = model::toggleShowSystemApps,
                     colors = toggleColors
                 ) {
 
@@ -119,7 +121,7 @@ actual fun SplitTunnelScreen(component: SplitTunnelComponent, padding: PaddingVa
                 items(appList, key = { it.packageName }) { app ->
                     AppItem(
                         app = app,
-                        onAppChecked = component::onCheckApp,
+                        onAppChecked = model::onCheckApp,
                         enabled = !routeAllApps,
                         toggleColors = toggleColors,
                         modifier = Modifier.animateItem()

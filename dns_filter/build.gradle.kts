@@ -40,9 +40,13 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
             api(libs.compose.components.resources)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
 
             // Koin
-            api("io.insert-koin:koin-core:3.2.0")
+            implementation(libs.koin.core)
+            implementation(libs.koin.viewmodel)
+            implementation(libs.koin.compose.viewmodel)
 
             // Decompose
             api(libs.decompose)

@@ -55,8 +55,8 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import io.iskopasi.dns_filter.ui.DnsFilterScreen
+import io.iskopasi.kmpvpntest.api.EventBus
 import io.iskopasi.kmpvpntest.api.showToast
-import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.theme.LucideListFilterPlus
 import io.iskopasi.kmpvpntest.theme.TablerRouteAltLeft
 import io.iskopasi.kmpvpntest.theme.TablerRouter
@@ -72,6 +72,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import org.koin.compose.koinInject
 
 @Serializable
 sealed interface Screen : NavKey {
@@ -135,11 +136,14 @@ fun AnimatedBackground() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun App(root: RootComponent, homeViewModel: IHomeViewModel) {
+fun App(
+    homeViewModel: IHomeViewModel,
+    eventBus: EventBus = koinInject()
+) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        root.eventBus.events.collect { event ->
+        eventBus.events.collect { event ->
             if (event.isNotEmpty()) {
                 showToast(event)
                 snackbarHostState.showSnackbar(event)
@@ -218,14 +222,12 @@ fun App(root: RootComponent, homeViewModel: IHomeViewModel) {
 
                             is Screen.DnsFilter -> NavEntry(key) {
                                 DnsFilterScreen(
-                                    component = root.dnsFilterComponent,
                                     padding = padding
                                 )
                             }
 
                             is Screen.SplitTunnel -> NavEntry(key) {
                                 SplitTunnelScreen(
-                                    component = root.splitTunnel,
                                     padding = padding
                                 )
                             }

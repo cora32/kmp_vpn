@@ -44,7 +44,6 @@ import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
-import io.iskopasi.splittunnel.decompose.SplitTunnelComponent
 import io.iskopasi.splittunnel.generated.resources.Res
 import io.iskopasi.splittunnel.generated.resources.loading_processes
 import io.iskopasi.splittunnel.generated.resources.pick_executable
@@ -54,18 +53,20 @@ import io.iskopasi.splittunnel.generated.resources.route_these_apps
 import io.iskopasi.splittunnel.generated.resources.routing_everything
 import io.iskopasi.splittunnel.generated.resources.running_processes
 import io.iskopasi.splittunnel.managers.AppManagerData
+import io.iskopasi.splittunnel.viewmodels.SplitTunnelViewModelDesktop
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 actual fun SplitTunnelScreen(
-    component: SplitTunnelComponent,
     padding: PaddingValues
 ) {
-    val runningProcesses by component.runningProcessesFlow.collectAsStateWithLifecycle()
-    val allowedApps by component.allowedAppsFlow.collectAsStateWithLifecycle()
+    val model = koinViewModel<SplitTunnelViewModelDesktop>()
+    val runningProcesses by model.runningProcessesFlow.collectAsStateWithLifecycle()
+    val allowedApps by model.allowedAppsFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        component.getProcessList()
+        model.getProcessList()
     }
 
     Column(
@@ -80,14 +81,14 @@ actual fun SplitTunnelScreen(
     ) {
         RunningProcessesBox(
             runningProcesses = runningProcesses,
-            onAddApp = component::onAddApp,
-            getProcessList = component::getProcessList,
-            onSelectExe = component::onSelectFile,
+            onAddApp = model::onAddApp,
+            getProcessList = model::getProcessList,
+            onSelectExe = model::onSelectFile,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AllowedApps(allowedApps = allowedApps, onRemove = component::onRemoveApp)
+        AllowedApps(allowedApps = allowedApps, onRemove = model::onRemoveApp)
     }
 }
 
