@@ -13,9 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.arkivanov.decompose.defaultComponentContext
 import io.iskopasi.kmpvpntest.api.initializeCoil
-import io.iskopasi.kmpvpntest.decompose.RootComponent
 import io.iskopasi.kmpvpntest.managers.PermissionType
 import io.iskopasi.kmpvpntest.viewmodels.HomeViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -28,16 +26,12 @@ class MainActivity : ComponentActivity(), KoinComponent {
         initializeCoil(this)
         super.onCreate(savedInstanceState)
 
-        val model = RootComponent(
-            componentContext = defaultComponentContext(),
-        )
-
         setContent {
             val homeViewModel: HomeViewModel = koinViewModel<HomeViewModel>()
 
             ListenForPermissionRequests(homeViewModel = homeViewModel)
 
-            App(root = model, homeViewModel = homeViewModel)
+            App(homeViewModel = homeViewModel)
         }
     }
 
