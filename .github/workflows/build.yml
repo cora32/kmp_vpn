@@ -68,9 +68,13 @@ jobs:
       - name: Build Desktop Distributable
         run: ./gradlew :desktopApp:createDistributable :desktopApp:packageMsi
 
-      - name: Zip Desktop Distribution
+      - name: Prepare Desktop Artifacts
         shell: pwsh
         run: |
+          # Copy MSI to root for easier upload/download
+          Copy-Item -Path "desktopApp/build/compose/binaries/main/msi/*.msi" -Destination "ProxyVPN-Windows-${{ github.ref_name }}.msi"
+          
+          # Create ZIP
           Compress-Archive `
             -Path desktopApp/build/compose/binaries/main/app/* `
             -DestinationPath "ProxyVPN-Windows-${{ github.ref_name }}.zip"
@@ -81,7 +85,7 @@ jobs:
           name: desktop-windows-binaries
           path: |
             ProxyVPN-Windows-${{ github.ref_name }}.zip
-            desktopApp/build/compose/binaries/main/msi/*.msi
+            ProxyVPN-Windows-${{ github.ref_name }}.msi
 
   release:
     needs:
@@ -98,13 +102,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Android APK
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: android-release-apk
           path: release
 
       - name: Download Desktop Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: desktop-windows-binaries
           path: release
