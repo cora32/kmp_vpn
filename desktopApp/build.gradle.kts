@@ -20,6 +20,11 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "io.iskopasi.kmpvpntest.MainKt"
+
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
+
         nativeDistributions {
             targetFormats(TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "ProxyVPN"

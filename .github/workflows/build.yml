@@ -116,5 +116,6 @@ jobs:
           gh release create "${{ github.ref_name }}" \
             release/*.apk \
             release/*.zip \
+            release/*.msi \
             --title "${{ github.ref_name }}" \
             --generate-notes
