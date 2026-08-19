@@ -20,16 +20,19 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "io.iskopasi.kmpvpntest.MainKt"
-
         nativeDistributions {
             targetFormats(TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "io.iskopasi.kmpvpntest"
+            packageName = "ProxyVPN"
             packageVersion = "1.0.0"
+            vendor = "Iskopasi"
+            description = "A cross-platform VPN application"
 
             windows {
-                // 'requestedExecutionLevel' is unresolved in this version of Compose Multiplatform (1.11.0).
-                // If you need admin privileges, consider using a custom manifest or a third-party plugin.
-                // requestedExecutionLevel = "requireAdministrator"
+                shortcut = true
+                menu = true
+                menuGroup = "ProxyVPN"
+                upgradeUuid =
+                    "68c9f53e-862d-4566-880a-9d62d08a123a" // Random static UUID for upgrades
             }
         }
     }

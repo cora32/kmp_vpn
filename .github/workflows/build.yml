@@ -66,7 +66,7 @@ jobs:
           cache: gradle
 
       - name: Build Desktop Distributable
-        run: ./gradlew :desktopApp:createDistributable
+        run: ./gradlew :desktopApp:createDistributable :desktopApp:packageMsi
 
       - name: Zip Desktop Distribution
         shell: pwsh
@@ -75,11 +75,13 @@ jobs:
             -Path desktopApp/build/compose/binaries/main/app/* `
             -DestinationPath "ProxyVPN-Windows-${{ github.ref_name }}.zip"
 
-      - name: Upload Desktop ZIP
+      - name: Upload Desktop Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: desktop-windows-zip
-          path: "ProxyVPN-Windows-${{ github.ref_name }}.zip"
+          name: desktop-windows-binaries
+          path: |
+            ProxyVPN-Windows-${{ github.ref_name }}.zip
+            desktopApp/build/compose/binaries/main/msi/*.msi
 
   release:
     needs:
@@ -101,10 +103,10 @@ jobs:
           name: android-release-apk
           path: release
 
-      - name: Download Desktop ZIP
+      - name: Download Desktop Artifacts
         uses: actions/download-artifact@v5
         with:
-          name: desktop-windows-zip
+          name: desktop-windows-binaries
           path: release
 
       - name: Create GitHub Release

@@ -82,18 +82,15 @@ android {
 
     androidComponents {
         onVariants { variant ->
-            val appName = "kmp_vpn_test"
+            val appName = "proxy_vpn"
             val versionName =
                 variant.outputs.firstOrNull()?.versionName?.get() ?: defaultConfig.versionName
-            val versionCode =
-                variant.outputs.firstOrNull()?.versionCode?.get() ?: defaultConfig.versionCode
 
-            // This is the name template used for the AAB and APK
-            val newName = "${appName}_(${versionName})_(${versionCode})"
+            // requested format: proxy_vpn_{version}-release.apk
+            val newName = "${appName}_${versionName}"
 
             // Set the base name for all outputs of this variant
             variant.outputs.forEach { _ ->
-                // This property tells AGP what the 'base' of the filename should be
                 base.archivesName.set(newName)
             }
         }
