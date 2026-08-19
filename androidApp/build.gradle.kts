@@ -48,6 +48,17 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        create("release") {
+            // Read from environment variables if present (CI), otherwise fallback locally
+            val keystorePath = System.getenv("KEYSTORE_FILE_PATH") ?: "local-release.jks"
+
+            storeFile = file(keystorePath)
+            storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+            keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+            keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+        }
+    }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
