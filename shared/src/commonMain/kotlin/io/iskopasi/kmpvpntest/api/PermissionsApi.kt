@@ -1,20 +1,23 @@
 package io.iskopasi.kmpvpntest.api
 
-import androidx.compose.runtime.MutableState
+import io.iskopasi.kmpvpntest.managers.IPermissionRequester
 import kotlinx.coroutines.flow.StateFlow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 interface PermissionsApi {
     val isVPNGrantedFlow: StateFlow<Boolean>
     val isNotificationGrantedFlow: StateFlow<Boolean>
-    val requestVPNPermission: MutableState<Boolean>
-    val requestPostPermission: MutableState<Boolean>
+    val permissionRequester: IPermissionRequester
 
     fun setVPNPermissionState(isGranted: Boolean)
     fun setNotificationPermissionState(isGranted: Boolean)
     fun requestPermissions(): Pair<Boolean, Boolean>
 }
 
-abstract class PermissionsApiDefault : PermissionsApi {
+abstract class PermissionsApiDefault : PermissionsApi, KoinComponent {
+    override val permissionRequester by inject<IPermissionRequester>()
+
     override fun setVPNPermissionState(isGranted: Boolean) {
         "[PermissionsApi] VPN permission: $isGranted".e
     }

@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.iskopasi.kmpvpntest.decompose.MainComponent
 import io.iskopasi.kmpvpntest.generated.resources.Res
 import io.iskopasi.kmpvpntest.generated.resources.connect
 import io.iskopasi.kmpvpntest.generated.resources.connecting
@@ -39,6 +38,7 @@ import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cGray2
 import io.iskopasi.kmpvpntest.utils.theme.cRed
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
+import io.iskopasi.kmpvpntest.viewmodels.IHomeViewModel
 import org.jetbrains.compose.resources.stringResource
 
 private val ItemRowModifier = Modifier.fillMaxWidth()
@@ -46,10 +46,10 @@ private val ItemPaddingModifier = Modifier.padding(vertical = 4.dp, horizontal =
 private val ItemButtonModifier = Modifier.padding(horizontal = 8.dp).width(90.dp).height(25.dp)
 
 @Composable
-fun ListProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
-    val list by component.proxyList.collectAsStateWithLifecycle()
-    val isProxyListLoading by component.isProxyListLoading.collectAsStateWithLifecycle()
-    val state by component.state.collectAsStateWithLifecycle()
+fun ListProxyBlock(modifier: Modifier = Modifier, viewModel: IHomeViewModel) {
+    val list by viewModel.proxyList.collectAsStateWithLifecycle()
+    val isProxyListLoading by viewModel.isProxyListLoading.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -74,11 +74,12 @@ fun ListProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                         items(count = list.size, key = { item -> item }) { index ->
                             val item = list[index]
                             val isSelected =
-                                item.host == component.host && item.port == component.port
-                            val isConnected = isSelected && state == MainComponent.State.Connected
-                            val isConnecting = isSelected && state == MainComponent.State.Connecting
+                                item.host == viewModel.host && item.port == viewModel.port
+                            val isConnected = isSelected && state == IHomeViewModel.State.Connected
+                            val isConnecting =
+                                isSelected && state == IHomeViewModel.State.Connecting
                             val isDisconnecting =
-                                isSelected && state == MainComponent.State.Disconnecting
+                                isSelected && state == IHomeViewModel.State.Disconnecting
                             val bgColor =
                                 if (index % 2 == 0) cWhite.copy(alpha = 0.8f) else cWhite.copy(alpha = 0.6f)
 
@@ -88,9 +89,9 @@ fun ListProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                                 isConnected = isConnected,
                                 isConnecting = isConnecting,
                                 isDisconnecting = isDisconnecting,
-                                isEnabled = state != MainComponent.State.Connecting,
+                                isEnabled = state != IHomeViewModel.State.Connecting,
                                 bgColor = bgColor,
-                                onClick = component::onConnect
+                                onClick = viewModel::onConnect
                             )
                         }
                     }

@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.iskopasi.kmpvpntest.api.isAndroid
-import io.iskopasi.kmpvpntest.decompose.MainComponent
 import io.iskopasi.kmpvpntest.generated.resources.Res
 import io.iskopasi.kmpvpntest.generated.resources.connect
 import io.iskopasi.kmpvpntest.generated.resources.connecting
@@ -56,27 +55,28 @@ import io.iskopasi.kmpvpntest.generated.resources.disconnect
 import io.iskopasi.kmpvpntest.generated.resources.disconnecting
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cGray2
+import io.iskopasi.kmpvpntest.viewmodels.IHomeViewModel
 import org.jetbrains.compose.resources.stringResource
 
 
 @Composable
-fun CustomProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
-    val isHostError by component.isHostError.collectAsStateWithLifecycle()
-    val isPortError by component.isPortError.collectAsStateWithLifecycle()
-    val state by component.state.collectAsStateWithLifecycle()
-    val refreshSignal by component.refreshSignalFlow.collectAsStateWithLifecycle()
-    val isCertCheckEnabledState = remember { mutableStateOf(component.isCertCheckEnabled) }
-    val isAuthEnabledState = remember { mutableStateOf(component.isAuthEnabled) }
-    val isEnabled = state == MainComponent.State.Idle || state == MainComponent.State.Connected
+fun CustomProxyBlock(modifier: Modifier = Modifier, viewModel: IHomeViewModel) {
+    val isHostError by viewModel.isHostError.collectAsStateWithLifecycle()
+    val isPortError by viewModel.isPortError.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val refreshSignal by viewModel.refreshSignalFlow.collectAsStateWithLifecycle()
+    val isCertCheckEnabledState = remember { mutableStateOf(viewModel.isCertCheckEnabled) }
+    val isAuthEnabledState = remember { mutableStateOf(viewModel.isAuthEnabled) }
+    val isEnabled = state == IHomeViewModel.State.Idle || state == IHomeViewModel.State.Connected
     val hostState = remember(refreshSignal) {
-        mutableStateOf(component.host)
+        mutableStateOf(viewModel.host)
     }
-    val portState = remember(refreshSignal) { mutableStateOf(component.port) }
-    val usernameState = remember(refreshSignal) { mutableStateOf(component.username) }
-    val passwordState = remember(refreshSignal) { mutableStateOf(component.password) }
+    val portState = remember(refreshSignal) { mutableStateOf(viewModel.port) }
+    val usernameState = remember(refreshSignal) { mutableStateOf(viewModel.username) }
+    val passwordState = remember(refreshSignal) { mutableStateOf(viewModel.password) }
 
-    LaunchedEffect(component.isAuthEnabled) {
-        isAuthEnabledState.value = component.isAuthEnabled
+    LaunchedEffect(viewModel.isAuthEnabled) {
+        isAuthEnabledState.value = viewModel.isAuthEnabled
     }
 
     Column(
@@ -98,7 +98,7 @@ fun CustomProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                     label = "IP (socks5)",
                     state = hostState,
                     isError = isHostError,
-                    onValueChange = component::onHostChanged,
+                    onValueChange = viewModel::onHostChanged,
                     isEnabled = isEnabled,
                     modifier = Modifier.weight(1f).padding(end = 8.dp),
                     keyboardType = KeyboardType.Number
@@ -107,7 +107,7 @@ fun CustomProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                     label = "Port",
                     state = portState,
                     isError = isPortError,
-                    onValueChange = component::onPortChanged,
+                    onValueChange = viewModel::onPortChanged,
                     isEnabled = isEnabled,
                     modifier = Modifier.width(80.dp),
                     keyboardType = KeyboardType.Number
@@ -120,7 +120,7 @@ fun CustomProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                     state = isCertCheckEnabledState,
                     text = "Enable certificate check:",
                     onCheckedChange = {
-                        component.onCertCheckChanged(it)
+                        viewModel.onCertCheckChanged(it)
                     }
                 )
             Spacer(modifier = Modifier.height(8.dp))
@@ -129,7 +129,7 @@ fun CustomProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                 state = isAuthEnabledState,
                 text = "Enable authorization:",
                 onCheckedChange = {
-                    component.onAuthChanged(it)
+                    viewModel.onAuthChanged(it)
                 }
             )
             AnimatedVisibility(
@@ -141,7 +141,7 @@ fun CustomProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                     Input(
                         label = "Username",
                         state = usernameState,
-                        onValueChange = component::onUsernameChanged,
+                        onValueChange = viewModel::onUsernameChanged,
                         isEnabled = isEnabled && isAuthEnabledState.value,
                         modifier = Modifier,
                         placeholder = "Leave empty if no auth required"
@@ -150,7 +150,7 @@ fun CustomProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
                     Input(
                         label = "Password",
                         state = passwordState,
-                        onValueChange = component::onPasswordChanged,
+                        onValueChange = viewModel::onPasswordChanged,
                         modifier = Modifier,
                         isEnabled = isEnabled && isAuthEnabledState.value,
                         imeAction = ImeAction.Done,
@@ -161,7 +161,7 @@ fun CustomProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
             }
 
         }
-        ConnectButton(onClick = component::onConnect, isEnabled = isEnabled, state = state)
+        ConnectButton(onClick = viewModel::onConnect, isEnabled = isEnabled, state = state)
     }
 }
 
@@ -170,12 +170,12 @@ fun ConnectButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     isEnabled: Boolean,
-    state: MainComponent.State
+    state: IHomeViewModel.State
 ) {
     val buttonText = when (state) {
-        MainComponent.State.Disconnecting -> stringResource(Res.string.disconnecting)
-        MainComponent.State.Connecting -> stringResource(Res.string.connecting)
-        MainComponent.State.Connected -> stringResource(Res.string.disconnect)
+        IHomeViewModel.State.Disconnecting -> stringResource(Res.string.disconnecting)
+        IHomeViewModel.State.Connecting -> stringResource(Res.string.connecting)
+        IHomeViewModel.State.Connected -> stringResource(Res.string.disconnect)
         else -> stringResource(Res.string.connect)
     }
 
@@ -184,7 +184,7 @@ fun ConnectButton(
         enabled = isEnabled,
         shape = RectangleShape,
         colors = ButtonDefaults.textButtonColors(
-            containerColor = if (state == MainComponent.State.Connecting) Color.Transparent else Color.White,
+            containerColor = if (state == IHomeViewModel.State.Connecting) Color.Transparent else Color.White,
         ),
         contentPadding = PaddingValues(vertical = 18.dp),
         modifier = Modifier.fillMaxWidth()

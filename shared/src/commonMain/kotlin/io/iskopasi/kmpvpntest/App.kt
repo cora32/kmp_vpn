@@ -66,6 +66,7 @@ import io.iskopasi.kmpvpntest.ui.MainScreen
 import io.iskopasi.kmpvpntest.utils.theme.cBg
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.cWhite
+import io.iskopasi.kmpvpntest.viewmodels.IHomeViewModel
 import io.iskopasi.splittunnel.ui.SplitTunnelScreen
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -134,7 +135,7 @@ fun AnimatedBackground() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun App(root: RootComponent) {
+fun App(root: RootComponent, homeViewModel: IHomeViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -210,8 +211,8 @@ fun App(root: RootComponent) {
                         when (key) {
                             is Screen.Main -> NavEntry(key) {
                                 MainScreen(
-                                    component = root.main,
-                                    padding = padding
+                                    padding = padding,
+                                    homeViewModel = homeViewModel
                                 )
                             }
 

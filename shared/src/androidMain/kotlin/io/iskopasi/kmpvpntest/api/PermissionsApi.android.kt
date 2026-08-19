@@ -5,9 +5,8 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.net.VpnService
 import android.os.Build
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
+import io.iskopasi.kmpvpntest.managers.PermissionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -21,9 +20,6 @@ class AndroidPermissionApi : PermissionsApiDefault(), KoinComponent {
 
     override val isVPNGrantedFlow = _isVPNGrantedFlow.asStateFlow()
     override val isNotificationGrantedFlow = _isNotificationGrantedFlow.asStateFlow()
-
-    override val requestVPNPermission: MutableState<Boolean> = mutableStateOf(false)
-    override val requestPostPermission: MutableState<Boolean> = mutableStateOf(false)
 
     init {
         checkPostPermission()
@@ -67,8 +63,8 @@ class AndroidPermissionApi : PermissionsApiDefault(), KoinComponent {
     }
 
     override fun requestPermissions(): Pair<Boolean, Boolean> {
-        requestPostPermission.value = true
-        requestVPNPermission.value = true
+        permissionRequester.request(PermissionType.Notification)
+        permissionRequester.request(PermissionType.Vpn)
 
         return isVPNGrantedFlow.value to isNotificationGrantedFlow.value
     }

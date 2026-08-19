@@ -30,13 +30,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.iskopasi.kmpvpntest.decompose.MainComponent
 import io.iskopasi.kmpvpntest.generated.resources.Res
 import io.iskopasi.kmpvpntest.generated.resources.custom
 import io.iskopasi.kmpvpntest.generated.resources.list
 import io.iskopasi.kmpvpntest.utils.LogoText
 import io.iskopasi.kmpvpntest.utils.theme.cGray
 import io.iskopasi.kmpvpntest.utils.theme.silver
+import io.iskopasi.kmpvpntest.viewmodels.IHomeViewModel
 import org.jetbrains.compose.resources.stringResource
 
 enum class ProxyUIState {
@@ -45,7 +45,10 @@ enum class ProxyUIState {
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding: PaddingValues) {
+fun MainScreen(
+    modifier: Modifier = Modifier, padding: PaddingValues,
+    homeViewModel: IHomeViewModel
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -58,8 +61,7 @@ fun MainScreen(modifier: Modifier = Modifier, component: MainComponent, padding:
         ) {
             Logo()
 
-
-            CompositeProxyBlock(component = component)
+            CompositeProxyBlock(model = homeViewModel)
         }
     }
 }
@@ -77,7 +79,7 @@ fun Logo(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CompositeProxyBlock(modifier: Modifier = Modifier, component: MainComponent) {
+fun CompositeProxyBlock(modifier: Modifier = Modifier, model: IHomeViewModel) {
     var uiState by remember { mutableStateOf(ProxyUIState.List) }
 
     Surface(
@@ -99,7 +101,7 @@ fun CompositeProxyBlock(modifier: Modifier = Modifier, component: MainComponent)
                     onClick = {
                         uiState = ProxyUIState.List
 
-                        component.fetchNewProxies()
+                        model.fetchNewProxies()
                     },
                     shape = RectangleShape,
                     colors = ButtonDefaults.textButtonColors(
@@ -138,8 +140,8 @@ fun CompositeProxyBlock(modifier: Modifier = Modifier, component: MainComponent)
             }
             AnimatedContent(uiState, contentAlignment = Alignment.Center) {
                 when (it) {
-                    ProxyUIState.List -> ListProxyBlock(component = component)
-                    ProxyUIState.Custom -> CustomProxyBlock(component = component)
+                    ProxyUIState.List -> ListProxyBlock(viewModel = model)
+                    ProxyUIState.Custom -> CustomProxyBlock(viewModel = model)
                 }
             }
         }

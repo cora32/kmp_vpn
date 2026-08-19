@@ -13,9 +13,6 @@ class RootComponent(
 ) : ComponentContext by componentContext, KoinComponent {
     val eventBus: EventBus by inject()
 
-    val main = MainComponentImpl(
-        componentContext = childContext("main"),
-    )
     val splitTunnel = getSplitTunnelComponent(context = childContext("split_tunnel"))
     val dnsFilterComponent = DnsFilterComponent(context = childContext("dns_filter"))
 }

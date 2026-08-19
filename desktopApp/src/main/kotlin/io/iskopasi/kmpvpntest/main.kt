@@ -45,7 +45,10 @@ import io.iskopasi.kmpvpntest.theme.VscodeCodiconsClose
 import io.iskopasi.kmpvpntest.theme.dark
 import io.iskopasi.kmpvpntest.theme.light
 import io.iskopasi.kmpvpntest.utils.theme.cDarkGray
+import io.iskopasi.kmpvpntest.viewmodels.HomeViewModel
+import io.iskopasi.kmpvpntest.viewmodels.IHomeViewModel
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -71,6 +74,7 @@ fun elevateProcess() {
     // Use PowerShell to trigger the UAC prompt
     val pb = ProcessBuilder(
         "powershell",
+        "-NoExit",
         "Start-Process",
         "'$javaBin'",
         "-ArgumentList",
@@ -83,58 +87,56 @@ fun elevateProcess() {
     pb.start()
 }
 
-fun main() = application {
-    // 1. State to track focus requests (using timestamp to ensure change detection)
-    var focusTrigger by remember { mutableStateOf(0L) }
-    val windowState = rememberWindowState(width = 500.dp, height = 800.dp)
+fun main() {
+    application {
+        // 1. State to track focus requests (using timestamp to ensure change detection)
+        var focusTrigger by remember { mutableStateOf(0L) }
+        val windowState = rememberWindowState(width = 500.dp, height = 800.dp)
 
-    // 2. Initialize Single Instance logic
-    val controller = remember {
-        SingleInstanceManager(port = 9999) {
-            // This runs in Instance #1 when Instance #2 is launched
-            focusTrigger = System.currentTimeMillis()
-        }
-    }
-
-    // 3. Exit if this is the second instance
-    if (!controller.isFirstInstance()) {
-        exitApplication()
-        return@application
-    }
-
-    if (!isWindowsAdmin()) {
-        elevateProcess() // We need this to clean our interfaces on cleanup
-        return@application // Exit the non-admin process
-    }
-
-    initializeCoil()
-
-    startKoin {
-        modules(
-            getModules(),
-
-            module {
-                single<VPNLauncherInterface> {
-                    VPNLauncher()
-                }
+        // 2. Initialize Single Instance logic
+        val controller = remember {
+            SingleInstanceManager(port = 9999) {
+                // This runs in Instance #1 when Instance #2 is launched
+                focusTrigger = System.currentTimeMillis()
             }
+        }
+
+        // 3. Exit if this is the second instance
+        if (!controller.isFirstInstance()) {
+            exitApplication()
+            return@application
+        }
+
+        if (!isWindowsAdmin()) {
+            elevateProcess() // We need this to clean our interfaces on cleanup
+            return@application // Exit the non-admin process
+        }
+
+        initializeCoil()
+
+        startKoin {
+            modules(
+                getModules(),
+
+                module {
+                    single<VPNLauncherInterface> {
+                        VPNLauncher()
+                    }
+                }
+            )
+        }
+
+        val model = RootComponent(
+            componentContext = DefaultComponentContext(
+                LifecycleRegistry()
+            ),
         )
-    }
 
-    val model = RootComponent(
-        componentContext = DefaultComponentContext(
-            LifecycleRegistry()
-        ),
-    )
+        val interactionSourceHide = remember { MutableInteractionSource() }
+        val interactionSourceClose = remember { MutableInteractionSource() }
+        val isHideHovered by interactionSourceHide.collectIsHoveredAsState()
+        val isCloseHovered by interactionSourceClose.collectIsHoveredAsState()
 
-    val interactionSourceHide = remember { MutableInteractionSource() }
-    val interactionSourceClose = remember { MutableInteractionSource() }
-    val isHideHovered by interactionSourceHide.collectIsHoveredAsState()
-    val isCloseHovered by interactionSourceClose.collectIsHoveredAsState()
-
-    MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) dark else light
-    ) {
         Window(
             onCloseRequest = {
                 // 1. Get the VPNLauncher from Koin
@@ -151,62 +153,75 @@ fun main() = application {
             undecorated = true,
             resizable = false
         ) {
-            LaunchedEffect(focusTrigger) {
-                if (focusTrigger > 0) {
-                    windowState.isMinimized = false
-                    window.isAlwaysOnTop = true
-                    window.toFront()
-                    window.requestFocus()
-                    window.isAlwaysOnTop = false
-                }
-            }
+            MaterialTheme(
+                colorScheme = if (isSystemInDarkTheme()) dark else light
+            ) {
+                val homeViewModel: IHomeViewModel = koinViewModel<HomeViewModel>()
 
-            Column {
-                WindowDraggableArea {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .background(cDarkGray)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.app_name),
-                            modifier = Modifier.align(Alignment.CenterStart).padding(start = 16.dp),
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-
-                        Row(modifier = Modifier.align(Alignment.CenterEnd)) {
-                            IconButton(
-                                onClick = { windowState.isMinimized = true },
-                                interactionSource = interactionSourceHide,
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .width(48.dp)
-                                    .background(
-                                        color = if (isHideHovered) Color.Yellow else Color.Transparent,
-                                        shape = RectangleShape
-                                    )
-                            ) {
-                                Icon(imageVector = MaterialIconsMinimize, contentDescription = null)
-                            }
-                            IconButton(
-                                onClick = ::exitApplication,
-                                interactionSource = interactionSourceClose,
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .width(48.dp)
-                                    .background(
-                                        color = if (isCloseHovered) Color.Red else Color.Transparent,
-                                        shape = RectangleShape
-                                    )
-                            ) {
-                                Icon(imageVector = VscodeCodiconsClose, contentDescription = null)
-                            }
-                        }
+                LaunchedEffect(focusTrigger) {
+                    if (focusTrigger > 0) {
+                        windowState.isMinimized = false
+                        window.isAlwaysOnTop = true
+                        window.toFront()
+                        window.requestFocus()
+                        window.isAlwaysOnTop = false
                     }
                 }
 
-                App(root = model)
+                Column {
+                    WindowDraggableArea {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .background(cDarkGray)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.app_name),
+                                modifier = Modifier.align(Alignment.CenterStart)
+                                    .padding(start = 16.dp),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+
+                            Row(modifier = Modifier.align(Alignment.CenterEnd)) {
+                                IconButton(
+                                    onClick = { windowState.isMinimized = true },
+                                    interactionSource = interactionSourceHide,
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(48.dp)
+                                        .background(
+                                            color = if (isHideHovered) Color.Yellow else Color.Transparent,
+                                            shape = RectangleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        imageVector = MaterialIconsMinimize,
+                                        contentDescription = null
+                                    )
+                                }
+                                IconButton(
+                                    onClick = ::exitApplication,
+                                    interactionSource = interactionSourceClose,
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(48.dp)
+                                        .background(
+                                            color = if (isCloseHovered) Color.Red else Color.Transparent,
+                                            shape = RectangleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        imageVector = VscodeCodiconsClose,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    App(root = model, homeViewModel = homeViewModel)
+                }
             }
         }
     }

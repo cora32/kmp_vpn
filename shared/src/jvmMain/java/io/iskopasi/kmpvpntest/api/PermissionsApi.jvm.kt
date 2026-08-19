@@ -1,7 +1,5 @@
 package io.iskopasi.kmpvpntest.api
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -11,8 +9,6 @@ class DesktopPermissionApi : PermissionsApiDefault() {
 
     override val isVPNGrantedFlow = _isVPNGrantedFlow.asStateFlow()
     override val isNotificationGrantedFlow = _isNotificationGrantedFlow.asStateFlow()
-    override val requestVPNPermission: MutableState<Boolean> = mutableStateOf(false)
-    override val requestPostPermission: MutableState<Boolean> = mutableStateOf(false)
 
     override fun setVPNPermissionState(isGranted: Boolean) {
         // Noop

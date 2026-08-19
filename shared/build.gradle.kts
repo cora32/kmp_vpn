@@ -66,6 +66,8 @@ kotlin {
 
             // Koin
             api(libs.koin.core)
+            api(libs.koin.viewmodel)
+            api(libs.koin.compose.viewmodel)
 
             // Json
             api(libs.kotlinx.serialization.json)

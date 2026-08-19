@@ -1,6 +1,6 @@
-package io.iskopasi.kmpvpntest.decompose
+package io.iskopasi.kmpvpntest.viewmodels
 
-import com.arkivanov.decompose.ComponentContext
+import androidx.lifecycle.ViewModel
 import io.iskopasi.kmpvpntest.api.EventBus
 import io.iskopasi.kmpvpntest.api.PermissionsApi
 import io.iskopasi.kmpvpntest.api.PrefStoreApi
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-interface MainComponent {
+interface IHomeViewModel {
     val state: StateFlow<State>
     var isAuthEnabled: Boolean
     var isCertCheckEnabled: Boolean
@@ -59,15 +59,13 @@ interface MainComponent {
     }
 }
 
-class MainComponentImpl(
-    private val componentContext: ComponentContext,
-) : MainComponent, ComponentContext by componentContext, KoinComponent {
+class HomeViewModel : ViewModel(), KoinComponent, IHomeViewModel {
+    val permissionApi: PermissionsApi by inject()
     private val prefStore: PrefStoreApi by inject()
     private val proxyManager: ProxyManager by inject()
-    private val permissionApi: PermissionsApi by inject()
     private val signalManager: SignalManager by inject()
     private val eventBus: EventBus by inject()
-    private val _state = MutableStateFlow(MainComponent.State.Idle)
+    private val _state = MutableStateFlow(IHomeViewModel.State.Idle)
     private val _isHostError = MutableStateFlow(false)
     private val _isPortError = MutableStateFlow(false)
     private val _errorMessage = MutableStateFlow("")
@@ -106,7 +104,7 @@ class MainComponentImpl(
                     "errorMsg: $errorMsg".e
                     // Update UI state with error
                     _errorMessage.update { errorMsg }
-                    setState(MainComponent.State.Idle)
+                    setState(IHomeViewModel.State.Idle)
                 }
         }
 
@@ -184,9 +182,9 @@ class MainComponentImpl(
             }.collect { bothGranted ->
                 if (bothGranted) {
                     // Decide whether to connect or disconnect based on CURRENT state
-                    if (state.value == MainComponent.State.Connected) {
+                    if (state.value == IHomeViewModel.State.Connected) {
                         disconnect()
-                    } else if (state.value == MainComponent.State.Idle) {
+                    } else if (state.value == IHomeViewModel.State.Idle) {
                         connect()
                     }
                 }
@@ -229,15 +227,15 @@ class MainComponentImpl(
     }
 
     private fun disconnect() {
-        setState(MainComponent.State.Disconnecting)
+        setState(IHomeViewModel.State.Disconnecting)
 
         proxyManager.stopVPN()
         proxyManager.signalManager.reset()
-        setState(MainComponent.State.Idle)
+        setState(IHomeViewModel.State.Idle)
     }
 
     private fun connect() {
-        setState(MainComponent.State.Connecting)
+        setState(IHomeViewModel.State.Connecting)
 
         scope.launch {
             signalManager.reset()
@@ -253,23 +251,23 @@ class MainComponentImpl(
                     "[MainComponent] isConnected result: $isConnected".e
 
                     if (isConnected) {
-                        setState(MainComponent.State.Connected)
+                        setState(IHomeViewModel.State.Connected)
                     } else {
-                        setState(MainComponent.State.Idle)
+                        setState(IHomeViewModel.State.Idle)
                     }
                 } else {
-                    setState(MainComponent.State.Idle)
+                    setState(IHomeViewModel.State.Idle)
                     signalManager.onError("Connection error.\nCheck your proxy settings.")
                     eventBus.sendEvent("Connection error.\nCheck your proxy settings.")
                 }
             } catch (ex: Exception) {
-                setState(MainComponent.State.Idle)
+                setState(IHomeViewModel.State.Idle)
                 eventBus.sendEvent("${ex.message}")
             }
         }
     }
 
-    private fun setState(state: MainComponent.State) {
+    private fun setState(state: IHomeViewModel.State) {
         "[MainComponent] Setting state: $state".e
 
         _state.update {
