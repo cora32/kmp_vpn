@@ -35,6 +35,6 @@ plugins {
 include(":androidApp")
 include(":desktopApp")
 include(":shared")
-include(":shared:splittunnel")
-include(":shared:dns_filter")
+include(":splittunnel")
+include(":dns_filter")
 include(":utils")

@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     implementation(projects.shared)
-    implementation(projects.shared.splittunnel)
+    implementation(projects.splittunnel)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutinesSwing)

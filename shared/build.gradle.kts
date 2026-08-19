@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
 
-    kotlin("plugin.serialization") version "2.0.0"
+    alias(libs.plugins.kotlinSerialization)
 }
 
 compose.resources {
@@ -48,8 +48,8 @@ kotlin {
         }
         commonMain.dependencies {
             api(projects.utils)
-            api(projects.shared.splittunnel)
-            api(projects.shared.dnsFilter)
+            api(projects.splittunnel)
+            api(projects.dnsFilter)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             api(libs.compose.material3)

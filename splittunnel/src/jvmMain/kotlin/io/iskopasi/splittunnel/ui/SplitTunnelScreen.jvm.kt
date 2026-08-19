@@ -211,7 +211,7 @@ fun ColumnScope.RunningProcessesBox(
 
                             ),
                             fontWeight = FontWeight.Light
-                    )
+                        )
                     }
 
                     else -> RunningProcList(

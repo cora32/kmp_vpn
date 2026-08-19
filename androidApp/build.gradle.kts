@@ -17,8 +17,8 @@ kotlin {
 }
 dependencies {
     implementation(projects.shared)
-    implementation(projects.shared.splittunnel)
-    implementation(projects.shared.dnsFilter)
+    implementation(projects.splittunnel)
+    implementation(projects.dnsFilter)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.splashscreen)

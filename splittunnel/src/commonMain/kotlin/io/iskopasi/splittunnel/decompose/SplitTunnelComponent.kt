@@ -68,16 +68,6 @@ abstract class SplitTunnelComponentAbstract : SplitTunnelComponent, KoinComponen
     protected val _runningProcessesFlow = MutableStateFlow(emptyList<AppManagerData>())
     override val runningProcessesFlow = _runningProcessesFlow
 
-//    init {
-//        restoreAllowedMap()
-//    }
-//
-//    private fun restoreAllowedMap() {
-//        prefStore.allowedApps.forEach {
-//            allowedAppsMap[it] = true
-//        }
-//    }
-
     override fun getAppList() {
         _isLoading.update {
             true
